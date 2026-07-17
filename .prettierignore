@@ -1,0 +1,9 @@
+# Ignore artifacts:
+build
+coverage
+
+# Assets estáticos servidos como estão:
+public
+
+# Managed by pnpm — never hand-format:
+pnpm-lock.yaml
