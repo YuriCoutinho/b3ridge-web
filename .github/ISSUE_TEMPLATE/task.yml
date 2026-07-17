@@ -1,0 +1,46 @@
+name: Task
+description: Tarefa refinada (feature, chore, melhoria)
+title: '[Task]: '
+labels: ['task']
+body:
+  - type: markdown
+    attributes:
+      value: Preencha o refinamento da tarefa. Campos marcados são obrigatórios.
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto
+      description: Por que essa tarefa existe? Que problema ou necessidade resolve?
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objetivo
+      description: O que deve ser entregue, de forma objetiva.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceite
+      description: Lista verificável do que precisa ser verdade para concluir a tarefa.
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+  - type: textarea
+    id: technical
+    attributes:
+      label: Detalhes técnicos
+      description: Abordagem, decisões e pontos de atenção para a implementação.
+    validations:
+      required: false
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Fora de escopo
+      description: O que explicitamente NÃO entra nesta tarefa.
+    validations:
+      required: false
