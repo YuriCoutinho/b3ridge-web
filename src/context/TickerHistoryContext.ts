@@ -11,11 +11,11 @@ export const TickerHistoryContext =
   createContext<TickerHistoryContextValue | null>(null);
 
 export function useTickerHistory() {
-  const ctx = useContext(TickerHistoryContext);
-  if (!ctx) {
+  const context = useContext(TickerHistoryContext);
+  if (!context) {
     throw new Error(
       'useTickerHistory must be used within a TickerHistoryProvider',
     );
   }
-  return ctx;
+  return context;
 }

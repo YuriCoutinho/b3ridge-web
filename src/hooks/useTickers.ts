@@ -10,8 +10,8 @@ export function useTickers() {
   useEffect(() => {
     async function loadTickers() {
       try {
-        const data = await fetchTickers();
-        setTickers(data);
+        const loadedTickers = await fetchTickers();
+        setTickers(loadedTickers);
         setStatus('ready');
       } catch {
         setStatus('error');

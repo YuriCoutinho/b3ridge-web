@@ -14,19 +14,21 @@ export function TickerHistoryProvider({ children }: { children: ReactNode }) {
   const fetched = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const missing = selected.filter(
-      (ticker) => !fetched.current.has(ticker.symbol),
-    );
-
-    missing.forEach(async (ticker) => {
+    async function loadHistory(ticker: Ticker) {
       fetched.current.add(ticker.symbol);
       try {
         const points = await fetchTickerHistory(ticker.symbol);
-        setHistories((prev) => ({ ...prev, [ticker.symbol]: points }));
+        setHistories((previous) => ({ ...previous, [ticker.symbol]: points }));
       } catch {
         fetched.current.delete(ticker.symbol);
       }
-    });
+    }
+
+    const missingTickers = selected.filter(
+      (ticker) => !fetched.current.has(ticker.symbol),
+    );
+
+    missingTickers.forEach(loadHistory);
   }, [selected]);
 
   return (

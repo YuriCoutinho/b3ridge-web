@@ -1,11 +1,14 @@
 import { env } from '../config/env';
 
-export async function request<T>(path: string, headers?: {}): Promise<T> {
-  const res = await fetch(`${env.apiUrl}${path}`, { headers });
+export async function request<TResponse>(
+  path: string,
+  headers?: HeadersInit,
+): Promise<TResponse> {
+  const response = await fetch(`${env.apiUrl}${path}`, { headers });
 
-  if (!res.ok) {
-    throw new Error(`Request failed (${res.status}) at ${path}`);
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status}) at ${path}`);
   }
 
-  return res.json() as Promise<T>;
+  return response.json() as Promise<TResponse>;
 }
