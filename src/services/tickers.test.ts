@@ -1,11 +1,14 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { fetchTickers, fetchTickerHistory } from '@/services/tickers';
 
+const range = { startDate: '2026-07-12', endDate: '2026-07-19' };
+
 function stubFetch(body: unknown, ok = true, status = 200) {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockResolvedValue({ ok, status, json: async () => body }),
-  );
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValue({ ok, status, json: async () => body });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
 }
 
 afterEach(() => {
@@ -13,7 +16,7 @@ afterEach(() => {
 });
 
 describe('fetchTickers', () => {
-  it('retorna apenas symbol e name, descartando o resto do payload', async () => {
+  it('returns only symbol and name, discarding the rest of the payload', async () => {
     stubFetch({
       results: [
         { symbol: 'PETR4', name: 'Petrobras', quote: {}, sector: 'x' },
@@ -28,16 +31,10 @@ describe('fetchTickers', () => {
       { symbol: 'VALE3', name: 'Vale' },
     ]);
   });
-
-  it('lança erro quando a resposta não é ok', async () => {
-    stubFetch({}, false, 500);
-
-    await expect(fetchTickers()).rejects.toThrow();
-  });
 });
 
 describe('fetchTickerHistory', () => {
-  it('retorna os pontos de historicalDataPrice', async () => {
+  it('returns the historicalDataPrice points', async () => {
     const point = {
       date: 1,
       open: 1,
@@ -49,15 +46,34 @@ describe('fetchTickerHistory', () => {
     };
     stubFetch({ results: [{ data: { historicalDataPrice: [point] } }] });
 
-    const result = await fetchTickerHistory('PETR4');
+    const result = await fetchTickerHistory('PETR4', range);
 
     expect(result).toEqual([point]);
   });
 
-  it('retorna lista vazia quando results vem vazio', async () => {
+  it('sends symbols, startDate and endDate in the query', async () => {
+    const fetchMock = stubFetch({ results: [] });
+
+    await fetchTickerHistory('PETR4', range);
+
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain('symbols=PETR4');
+    expect(url).toContain('startDate=2026-07-12');
+    expect(url).toContain('endDate=2026-07-19');
+  });
+
+  it('throws ApiError carrying the status when the response is not ok', async () => {
+    stubFetch({}, false, 404);
+
+    await expect(fetchTickerHistory('XXXX', range)).rejects.toMatchObject({
+      status: 404,
+    });
+  });
+
+  it('returns an empty list when results is empty', async () => {
     stubFetch({ results: [] });
 
-    const result = await fetchTickerHistory('XXXX');
+    const result = await fetchTickerHistory('XXXX', range);
 
     expect(result).toEqual([]);
   });
