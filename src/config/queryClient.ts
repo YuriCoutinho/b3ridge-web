@@ -9,7 +9,7 @@ function isClientError(error: Error): boolean {
   return error instanceof ApiError && error.status >= 400 && error.status < 500;
 }
 
-function shouldRetry(failureCount: number, error: Error): boolean {
+export function shouldRetry(failureCount: number, error: Error): boolean {
   if (isClientError(error)) {
     return false;
   }

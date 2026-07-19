@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 describe('useTickerHistories', () => {
-  it('fetches each symbol in parallel and indexes the result by symbol', async () => {
+  it('indexes each symbol result by symbol', async () => {
     vi.mocked(fetchTickerHistory).mockImplementation(async (symbol) => [
       pointFor(symbol),
     ]);
