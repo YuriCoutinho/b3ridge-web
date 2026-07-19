@@ -1,14 +1,32 @@
 import { env } from '../config/env';
 
-export async function request<TResponse>(
+const REQUEST_TIMEOUT = 10000;
+
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+export async function request<T>(
   path: string,
   headers?: HeadersInit,
-): Promise<TResponse> {
-  const response = await fetch(`${env.apiUrl}${path}`, { headers });
+): Promise<T> {
+  const response = await fetch(`${env.apiUrl}${path}`, {
+    headers,
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+  });
 
   if (!response.ok) {
-    throw new Error(`Request failed (${response.status}) at ${path}`);
+    throw new ApiError(
+      `Request failed (${response.status}) at ${path}`,
+      response.status,
+    );
   }
 
-  return response.json() as Promise<TResponse>;
+  return response.json() as Promise<T>;
 }
