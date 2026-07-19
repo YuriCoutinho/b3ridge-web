@@ -1,25 +1,11 @@
-import { useEffect, useState } from 'react';
-import { fetchTickers, type Ticker } from '@/services/tickers';
-
-type Status = 'loading' | 'ready' | 'error';
+import { useQuery } from '@tanstack/react-query';
+import { fetchTickers } from '@/services/tickers';
 
 export function useTickers() {
-  const [tickers, setTickers] = useState<Ticker[]>([]);
-  const [status, setStatus] = useState<Status>('loading');
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['tickers', 'list'],
+    queryFn: fetchTickers,
+  });
 
-  useEffect(() => {
-    async function loadTickers() {
-      try {
-        const loadedTickers = await fetchTickers();
-        setTickers(loadedTickers);
-        setStatus('ready');
-      } catch {
-        setStatus('error');
-      }
-    }
-
-    loadTickers();
-  }, []);
-
-  return { tickers, status };
+  return { tickers: data ?? [], isPending, isError };
 }
