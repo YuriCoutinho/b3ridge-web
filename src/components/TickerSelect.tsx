@@ -1,19 +1,21 @@
 import type { ChangeEvent } from 'react';
 import { useTickers } from '@/hooks/useTickers';
-import { useTickerHistory } from '@/context/TickerHistoryContext';
+import type { Ticker } from '@/services/tickers';
 
-// Select nativo (<select multiple>) como placeholder da seleção de ativos.
-// O combobox com busca do shadcn substitui isso numa PR futura.
-export function TickerSelect() {
-  const { tickers, status } = useTickers();
-  const { selected, setSelected } = useTickerHistory();
+interface TickerSelectProps {
+  selected: Ticker[];
+  onSelect: (tickers: Ticker[]) => void;
+}
+
+export function TickerSelect({ selected, onSelect }: TickerSelectProps) {
+  const { tickers, isPending, isError } = useTickers();
 
   function handleChange(event: ChangeEvent<HTMLSelectElement>) {
     const symbols = Array.from(
       event.target.selectedOptions,
       (option) => option.value,
     );
-    setSelected(tickers.filter((ticker) => symbols.includes(ticker.symbol)));
+    onSelect(tickers.filter((ticker) => symbols.includes(ticker.symbol)));
   }
 
   return (
@@ -22,7 +24,7 @@ export function TickerSelect() {
       <select
         id="ticker-select"
         multiple
-        disabled={status !== 'ready'}
+        disabled={isPending || isError}
         value={selected.map((ticker) => ticker.symbol)}
         onChange={handleChange}
       >

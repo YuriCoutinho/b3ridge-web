@@ -1,9 +1,14 @@
-import { useTickerHistory } from '@/context/TickerHistoryContext';
+import type { Ticker } from '@/services/tickers';
+import type { DateRange } from '@/lib/dateRange';
+import { useTickerHistories } from '@/hooks/useTickerHistories';
 
-// Placeholder do gráfico: só imprime os valores do histórico na tela.
-// A estrutura de consumo do context fica pronta pro gráfico real substituir depois.
-export function HistoryPreview() {
-  const { selected, histories } = useTickerHistory();
+interface HistoryPreviewProps {
+  selected: Ticker[];
+  range: DateRange;
+}
+
+export function HistoryPreview({ selected, range }: HistoryPreviewProps) {
+  const histories = useTickerHistories(selected, range);
 
   if (selected.length === 0) {
     return <p>Nenhum ativo selecionado.</p>;

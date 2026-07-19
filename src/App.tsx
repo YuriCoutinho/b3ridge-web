@@ -1,13 +1,24 @@
 import { TickerSelect } from '@/components/TickerSelect';
+import { HistoryRangeControls } from '@/components/HistoryRangeControls';
 import { HistoryPreview } from '@/components/HistoryPreview';
-import { TickerHistoryProvider } from '@/context/TickerHistoryProvider';
+import { useTickerSelection } from '@/hooks/useTickerSelection';
+import { useDateRange } from '@/hooks/useDateRange';
 
 function App() {
+  const { selected, setSelected } = useTickerSelection();
+  const { range, activePreset, applyPreset, changeRange } = useDateRange();
+
   return (
-    <TickerHistoryProvider>
-      <TickerSelect />
-      <HistoryPreview />
-    </TickerHistoryProvider>
+    <>
+      <TickerSelect selected={selected} onSelect={setSelected} />
+      <HistoryRangeControls
+        range={range}
+        activePreset={activePreset}
+        onApplyPreset={applyPreset}
+        onChangeRange={changeRange}
+      />
+      <HistoryPreview selected={selected} range={range} />
+    </>
   );
 }
 
