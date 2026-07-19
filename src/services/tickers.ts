@@ -1,5 +1,6 @@
 import { request } from './client';
 import { env } from '../config/env';
+import type { DateRange } from '../lib/dateRange';
 
 export interface Ticker {
   symbol: string;
@@ -39,14 +40,16 @@ function slimTickers(tickers: Ticker[]): Ticker[] {
 
 export async function fetchTickerHistory(
   symbol: string,
+  { startDate, endDate }: DateRange,
 ): Promise<TickerHistoryPoint[]> {
   // TODO: Remove after implements backend endpoint
   const headers = {
     Authorization: `Bearer ${env.apiToken}`,
   };
 
+  const query = new URLSearchParams({ symbols: symbol, startDate, endDate });
   const { results } = await request<TickerHistoryResponse>(
-    `/stocks/historical?symbols=${symbol}`,
+    `/stocks/historical?${query}`,
     headers,
   );
 
