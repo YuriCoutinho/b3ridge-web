@@ -24,6 +24,15 @@ describe('resolveRange', () => {
       endDate: '2026-07-19',
     });
   });
+
+  it('anchors on the local calendar day near midnight, not on UTC', () => {
+    vi.setSystemTime(new Date('2026-07-20T02:00:00Z'));
+
+    expect(resolveRange('7d')).toEqual({
+      startDate: '2026-07-11',
+      endDate: '2026-07-18',
+    });
+  });
 });
 
 describe('isValidRange', () => {

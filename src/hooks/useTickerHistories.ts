@@ -1,4 +1,5 @@
-import { useQueries } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useQueries, type UseQueryResult } from '@tanstack/react-query';
 import {
   fetchTickerHistory,
   type Ticker,
@@ -11,15 +12,20 @@ type TickerHistories = Record<string, TickerHistoryPoint[] | undefined>;
 export function useTickerHistories(tickers: Ticker[], range: DateRange) {
   const enabled = isValidRange(range);
 
+  const combine = useCallback(
+    (results: UseQueryResult<TickerHistoryPoint[]>[]) =>
+      Object.fromEntries(
+        tickers.map((ticker, index) => [ticker.symbol, results[index].data]),
+      ) as TickerHistories,
+    [tickers],
+  );
+
   return useQueries({
     queries: tickers.map((ticker) => ({
       queryKey: ['tickers', 'history', ticker.symbol, range],
       queryFn: () => fetchTickerHistory(ticker.symbol, range),
       enabled,
     })),
-    combine: (results) =>
-      Object.fromEntries(
-        tickers.map((ticker, index) => [ticker.symbol, results[index].data]),
-      ) as TickerHistories,
+    combine,
   });
 }

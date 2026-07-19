@@ -19,6 +19,7 @@ export default defineConfig(({ command }) => ({
     css: true,
     env: {
       VITE_API_BASE_URL: 'https://brapi.dev/api/v2',
+      TZ: 'America/Sao_Paulo',
     },
   },
 }));
