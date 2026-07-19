@@ -1,6 +1,6 @@
 ## Tarefa
 
-[LIN-000](https://linear.app/sua-workspace/issue/LIN-000)
+<!-- Referencia a Issue -->
 
 ## Descrição
 
