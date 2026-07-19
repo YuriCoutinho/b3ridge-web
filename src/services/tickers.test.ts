@@ -70,6 +70,17 @@ describe('fetchTickerHistory', () => {
     });
   });
 
+  it('throws ApiError when the response does not match the schema', async () => {
+    stubFetch({
+      results: [{ data: { historicalDataPrice: [{ date: 'nope' }] } }],
+    });
+
+    await expect(fetchTickerHistory('PETR4', range)).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 502,
+    });
+  });
+
   it('returns an empty list when results is empty', async () => {
     stubFetch({ results: [] });
 

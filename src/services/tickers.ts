@@ -1,55 +1,61 @@
+import { z } from 'zod';
 import { request } from './client';
 import { env } from '../config/env';
 import type { DateRange } from '../lib/dateRange';
 
-export interface Ticker {
-  symbol: string;
-  name: string;
-}
+const tickerSchema = z.object({
+  symbol: z.string(),
+  name: z.string(),
+});
 
-interface TickersResponse {
-  results: Ticker[];
-}
+export type Ticker = z.infer<typeof tickerSchema>;
 
-export interface TickerHistoryPoint {
-  date: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-  adjustedClose: number;
-}
+const tickersResponseSchema = z.object({
+  results: z.array(tickerSchema),
+});
 
-interface TickerHistoryResponse {
-  results: {
-    data: {
-      historicalDataPrice: TickerHistoryPoint[];
-    };
-  }[];
-}
+const tickerHistoryPointSchema = z.object({
+  date: z.number(),
+  open: z.number(),
+  high: z.number(),
+  low: z.number(),
+  close: z.number(),
+  volume: z.number(),
+  adjustedClose: z.number(),
+});
+
+export type TickerHistoryPoint = z.infer<typeof tickerHistoryPointSchema>;
+
+const tickerHistoryResponseSchema = z.object({
+  results: z.array(
+    z.object({
+      data: z.object({
+        historicalDataPrice: z.array(tickerHistoryPointSchema),
+      }),
+    }),
+  ),
+});
 
 export async function fetchTickers(): Promise<Ticker[]> {
-  const { results } = await request<TickersResponse>('/tickers?limit=2000');
-  return slimTickers(results);
-}
-
-function slimTickers(tickers: Ticker[]): Ticker[] {
-  return tickers.map(({ symbol, name }) => ({ symbol, name }));
+  const { results } = await request(
+    '/tickers?limit=2000',
+    tickersResponseSchema,
+  );
+  return results;
 }
 
 export async function fetchTickerHistory(
   symbol: string,
   { startDate, endDate }: DateRange,
 ): Promise<TickerHistoryPoint[]> {
-  // TODO: Remove after implements backend endpoint
   const headers = {
     Authorization: `Bearer ${env.apiToken}`,
   };
 
   const query = new URLSearchParams({ symbols: symbol, startDate, endDate });
-  const { results } = await request<TickerHistoryResponse>(
+  const { results } = await request(
     `/stocks/historical?${query}`,
+    tickerHistoryResponseSchema,
     headers,
   );
 

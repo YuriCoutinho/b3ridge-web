@@ -25,7 +25,8 @@
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.101.2",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",

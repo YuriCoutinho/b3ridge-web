@@ -1,6 +1,8 @@
+import { z } from 'zod';
 import { env } from '../config/env';
 
 const REQUEST_TIMEOUT = 10000;
+const INVALID_SHAPE_STATUS = 502;
 
 export class ApiError extends Error {
   readonly status: number;
@@ -14,6 +16,7 @@ export class ApiError extends Error {
 
 export async function request<T>(
   path: string,
+  schema: z.ZodType<T>,
   headers?: HeadersInit,
 ): Promise<T> {
   const response = await fetch(`${env.apiUrl}${path}`, {
@@ -28,5 +31,13 @@ export async function request<T>(
     );
   }
 
-  return response.json() as Promise<T>;
+  const parsed = schema.safeParse(await response.json());
+  if (!parsed.success) {
+    throw new ApiError(
+      `Invalid response shape at ${path}`,
+      INVALID_SHAPE_STATUS,
+    );
+  }
+
+  return parsed.data;
 }
