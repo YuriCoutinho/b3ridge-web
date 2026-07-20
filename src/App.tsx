@@ -1,3 +1,5 @@
+import { Header } from '@/components/Header';
+import { Sidebar } from '@/components/Sidebar';
 import { TickerSelect } from '@/components/TickerSelect';
 import { HistoryRangeControls } from '@/components/HistoryRangeControls';
 import { HistoryPreview } from '@/components/HistoryPreview';
@@ -10,14 +12,28 @@ function App() {
 
   return (
     <>
-      <TickerSelect selected={selected} onSelect={setSelected} />
-      <HistoryRangeControls
-        range={range}
-        activePreset={activePreset}
-        onApplyPreset={applyPreset}
-        onChangeRange={changeRange}
-      />
-      <HistoryPreview selected={selected} range={range} />
+      <Header />
+
+      <div className="flex flex-1 flex-col lg:flex-row">
+        <Sidebar>
+          <TickerSelect selected={selected} onSelect={setSelected} />
+          <HistoryRangeControls
+            range={range}
+            activePreset={activePreset}
+            onApplyPreset={applyPreset}
+            onChangeRange={changeRange}
+          />
+        </Sidebar>
+
+        <main className="min-w-0 flex-1 p-4 lg:p-6">
+          <HistoryPreview selected={selected} range={range} />
+        </main>
+      </div>
+
+      <footer className="border-t border-grey-200 p-4 text-center text-xs text-grey-400 lg:hidden">
+        Dados via <span className="font-medium text-grey-500">brapi.dev</span> ·
+        preview simulado
+      </footer>
     </>
   );
 }
