@@ -23,6 +23,7 @@ export function TickerSelect({ selected, onSelect }: TickerSelectProps) {
       <label htmlFor="ticker-select">Ativos</label>
       <select
         id="ticker-select"
+        className="w-full"
         multiple
         disabled={isPending || isError}
         value={selected.map((ticker) => ticker.symbol)}
