@@ -25,6 +25,12 @@ export function useTickerHistories(tickers: Ticker[], range: DateRange) {
       queryKey: ['tickers', 'history', ticker.symbol, range],
       queryFn: () => fetchTickerHistory(ticker.symbol, range),
       enabled,
+      meta: {
+        toast: {
+          success: 'Cotações atualizadas',
+          error: 'Falha ao carregar as cotações',
+        },
+      },
     })),
     combine,
   });
