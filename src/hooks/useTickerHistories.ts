@@ -10,6 +10,8 @@ import { isValidRange, todayIso, type DateRange } from '@/lib/dateRange';
 type TickerHistory = {
   data: TickerHistoryPoint[];
   isPending: boolean;
+  isError: boolean;
+  error: Error | null;
 };
 
 type TickerHistories = Record<string, TickerHistory>;
@@ -25,6 +27,8 @@ export function useTickerHistories(tickers: Ticker[], range: DateRange) {
           {
             data: results[index].data ?? [],
             isPending: results[index].isPending,
+            isError: results[index].isError,
+            error: results[index].error,
           },
         ]),
       ) as TickerHistories,
