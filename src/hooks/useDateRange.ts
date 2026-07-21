@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import {
-  defaultPreset,
+  matchPreset,
   resolveRange,
   type DateRange,
   type RangePreset,
 } from '@/lib/dateRange';
 
-type ActivePreset = RangePreset | 'custom';
+type ActivePreset = RangePreset | null;
+
+const defaultPreset: RangePreset = '5d';
 
 export function useDateRange() {
   const [range, setRange] = useState<DateRange>(() =>
@@ -21,7 +23,7 @@ export function useDateRange() {
 
   function changeRange(next: DateRange) {
     setRange(next);
-    setActivePreset('custom');
+    setActivePreset(matchPreset(next));
   }
 
   return { range, activePreset, applyPreset, changeRange };
