@@ -16,26 +16,26 @@ describe('resolveRange', () => {
     vi.useRealTimers();
   });
 
-  it('anchors the end at D-1 for every preset', () => {
-    expect(resolveRange('5d').endDate).toBe('2026-07-19');
-    expect(resolveRange('ytd').endDate).toBe('2026-07-19');
+  it('anchors the end at D-3 for every preset', () => {
+    expect(resolveRange('5d').endDate).toBe('2026-07-17');
+    expect(resolveRange('ytd').endDate).toBe('2026-07-17');
   });
 
   it('moves the start back by 5 days', () => {
     expect(resolveRange('5d')).toEqual({
-      startDate: '2026-07-14',
-      endDate: '2026-07-19',
+      startDate: '2026-07-12',
+      endDate: '2026-07-17',
     });
   });
 
   it('moves the start back by calendar months', () => {
-    expect(resolveRange('1m').startDate).toBe('2026-06-19');
-    expect(resolveRange('3m').startDate).toBe('2026-04-19');
-    expect(resolveRange('6m').startDate).toBe('2026-01-19');
+    expect(resolveRange('1m').startDate).toBe('2026-06-17');
+    expect(resolveRange('3m').startDate).toBe('2026-04-17');
+    expect(resolveRange('6m').startDate).toBe('2026-01-17');
   });
 
   it('moves the start back by a calendar year', () => {
-    expect(resolveRange('1y').startDate).toBe('2025-07-19');
+    expect(resolveRange('1y').startDate).toBe('2025-07-17');
   });
 
   it('anchors the year-to-date start on January 1st', () => {
@@ -46,8 +46,8 @@ describe('resolveRange', () => {
     vi.setSystemTime(new Date('2026-07-20T02:00:00Z'));
 
     expect(resolveRange('5d')).toEqual({
-      startDate: '2026-07-13',
-      endDate: '2026-07-18',
+      startDate: '2026-07-11',
+      endDate: '2026-07-16',
     });
   });
 });
@@ -66,7 +66,7 @@ describe('matchPreset', () => {
     expect(matchPreset(resolveRange('3m'))).toBe('3m');
   });
 
-  it('returns null when the end is today instead of D-1', () => {
+  it('returns null when the end is more recent than the D-3 anchor', () => {
     expect(
       matchPreset({ startDate: '2026-07-15', endDate: '2026-07-20' }),
     ).toBeNull();
@@ -80,74 +80,76 @@ describe('matchPreset', () => {
 });
 
 describe('isValidRange', () => {
-  const today = '2026-07-20';
+  const maxEndDate = '2026-07-17';
 
-  it('accepts a coherent range', () => {
+  it('accepts a coherent range ending exactly on the max end date', () => {
     expect(
-      isValidRange({ startDate: '2026-07-12', endDate: '2026-07-19' }, today),
+      isValidRange(
+        { startDate: '2026-07-12', endDate: '2026-07-17' },
+        maxEndDate,
+      ),
     ).toBe(true);
   });
 
   it('rejects a start after the end', () => {
     expect(
-      isValidRange({ startDate: '2026-07-19', endDate: '2026-07-12' }, today),
+      isValidRange(
+        { startDate: '2026-07-16', endDate: '2026-07-12' },
+        maxEndDate,
+      ),
     ).toBe(false);
   });
 
   it('rejects a start equal to the end', () => {
     expect(
-      isValidRange({ startDate: '2026-07-19', endDate: '2026-07-19' }, today),
+      isValidRange(
+        { startDate: '2026-07-16', endDate: '2026-07-16' },
+        maxEndDate,
+      ),
     ).toBe(false);
   });
 
   it('rejects missing dates', () => {
-    expect(isValidRange({ startDate: '', endDate: '' }, today)).toBe(false);
+    expect(isValidRange({ startDate: '', endDate: '' }, maxEndDate)).toBe(
+      false,
+    );
   });
 
-  it('rejects an end on today', () => {
+  it('rejects an end past the max end date', () => {
     expect(
-      isValidRange({ startDate: '2026-07-19', endDate: today }, today),
-    ).toBe(false);
-  });
-
-  it('rejects an end in the future', () => {
-    expect(
-      isValidRange({ startDate: '2026-07-19', endDate: '2026-07-21' }, today),
+      isValidRange(
+        { startDate: '2026-07-15', endDate: '2026-07-18' },
+        maxEndDate,
+      ),
     ).toBe(false);
   });
 });
 
 describe('validateRange', () => {
-  const today = '2026-07-20';
+  const maxEndDate = '2026-07-17';
 
   it('returns no errors for a coherent range', () => {
     expect(
-      validateRange({ startDate: '2026-07-12', endDate: '2026-07-19' }, today),
+      validateRange(
+        { startDate: '2026-07-12', endDate: '2026-07-17' },
+        maxEndDate,
+      ),
     ).toEqual({ startError: null, endError: null });
   });
 
   it('flags the start when it is not before the end', () => {
     const { startError } = validateRange(
-      { startDate: '2026-07-19', endDate: '2026-07-19' },
-      today,
+      { startDate: '2026-07-16', endDate: '2026-07-16' },
+      maxEndDate,
     );
 
     expect(startError).not.toBeNull();
   });
 
-  it('flags the end when it falls on today', () => {
+  it('flags the end when it is past the max end date', () => {
     const { endError } = validateRange(
-      { startDate: '2026-07-19', endDate: today },
-      today,
-    );
-
-    expect(endError).not.toBeNull();
-  });
-
-  it('flags the end when it is in the future', () => {
-    const { endError } = validateRange(
-      { startDate: '2026-07-19', endDate: '2026-07-25' },
-      today,
+      { startDate: '2026-07-15', endDate: '2026-07-25' },
+      maxEndDate,
     );
 
     expect(endError).not.toBeNull();

@@ -9,7 +9,7 @@ import { createQueryWrapper } from '@/test/queryWrapper';
 
 vi.mock('@/services/tickers');
 
-const range = { startDate: '2026-07-12', endDate: '2026-07-19' };
+const range = { startDate: '2020-01-01', endDate: '2020-02-01' };
 const tickers = [
   { symbol: 'PETR4', name: 'Petrobras' },
   { symbol: 'VALE3', name: 'Vale' },

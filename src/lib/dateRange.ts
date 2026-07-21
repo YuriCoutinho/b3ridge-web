@@ -15,6 +15,8 @@ export interface DateRange {
 
 const isoFormat = 'yyyy-MM-dd';
 
+export const dataLagDays = 3;
+
 export type RangePreset = '5d' | '1m' | '3m' | '6m' | '1y' | 'ytd';
 
 export const rangePresets: { id: RangePreset; label: string }[] = [
@@ -35,8 +37,12 @@ const startResolvers: Record<RangePreset, (endDate: Date) => Date> = {
   ytd: (endDate) => startOfYear(endDate),
 };
 
+function maxEndDate(): Date {
+  return subDays(new Date(), dataLagDays);
+}
+
 export function resolveRange(preset: RangePreset): DateRange {
-  const endDate = subDays(new Date(), 1);
+  const endDate = maxEndDate();
   const startDate = startResolvers[preset](endDate);
   return { startDate: dateToIso(startDate), endDate: dateToIso(endDate) };
 }
@@ -53,12 +59,8 @@ export function matchPreset(range: DateRange): RangePreset | null {
   return preset?.id ?? null;
 }
 
-export function todayIso(): string {
-  return dateToIso(new Date());
-}
-
-export function yesterdayIso(): string {
-  return dateToIso(subDays(new Date(), 1));
+export function maxEndDateIso(): string {
+  return dateToIso(maxEndDate());
 }
 
 export function isoToDate(iso: string): Date | undefined {
@@ -76,22 +78,21 @@ export interface RangeErrors {
 }
 
 const startAfterEndMessage = 'A data inicial deve ser anterior à final.';
-const endAfterYesterdayMessage = 'A data final deve ser no máximo ontem.';
+const endAfterMaxMessage = `A data final deve ser de no máximo ${dataLagDays} dias atrás.`;
 
 export function validateRange(
   { startDate, endDate }: DateRange,
-  today: string,
+  maxEndDate: string,
 ): RangeErrors {
-  const endError =
-    endDate && endDate >= today ? endAfterYesterdayMessage : null;
+  const endError = endDate && endDate > maxEndDate ? endAfterMaxMessage : null;
   const startError =
     startDate && endDate && startDate >= endDate ? startAfterEndMessage : null;
 
   return { startError, endError };
 }
 
-export function isValidRange(range: DateRange, today: string): boolean {
-  const { startError, endError } = validateRange(range, today);
+export function isValidRange(range: DateRange, maxEndDate: string): boolean {
+  const { startError, endError } = validateRange(range, maxEndDate);
   const hasBothDates = Boolean(range.startDate && range.endDate);
 
   return hasBothDates && !startError && !endError;

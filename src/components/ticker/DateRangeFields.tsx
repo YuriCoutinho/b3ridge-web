@@ -1,10 +1,15 @@
 import { useEffect, useId, useState } from 'react';
 import { format, parse, isValid, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, InfoIcon } from 'lucide-react';
 import type { Matcher } from 'react-day-picker';
 
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   InputGroup,
   InputGroupAddon,
@@ -17,9 +22,10 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import {
+  dataLagDays,
   dateToIso,
   isoToDate,
-  yesterdayIso,
+  maxEndDateIso,
   type DateRange,
   type RangeErrors,
 } from '@/lib/dateRange';
@@ -44,6 +50,7 @@ interface DateFieldProps {
   disabled?: boolean;
   disabledDays: Matcher | Matcher[];
   defaultMonth: Date;
+  hint?: string;
 }
 
 function DateField({
@@ -54,6 +61,7 @@ function DateField({
   disabled,
   disabledDays,
   defaultMonth,
+  hint,
 }: DateFieldProps) {
   const inputId = useId();
   const errorId = useId();
@@ -85,12 +93,30 @@ function DateField({
 
   return (
     <div className="flex w-36 flex-col gap-1.5">
-      <label
-        htmlFor={inputId}
-        className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
-      >
-        {label}
-      </label>
+      <div className="flex items-center gap-1">
+        <label
+          htmlFor={inputId}
+          className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+        >
+          {label}
+        </label>
+        {hint && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={hint}
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                />
+              }
+            >
+              <InfoIcon className="size-3.5" />
+            </TooltipTrigger>
+            <TooltipContent>{hint}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
 
       <InputGroup>
         <InputGroupInput
@@ -155,15 +181,15 @@ export function DateRangeFields({
   errors,
   disabled,
 }: DateRangeFieldsProps) {
-  const yesterday = isoToDate(yesterdayIso())!;
+  const maxEndDate = isoToDate(maxEndDateIso())!;
   const startDate = isoToDate(range.startDate);
   const endDate = isoToDate(range.endDate);
 
   const startDisabledDays: Matcher = {
-    after: endDate ? subDays(endDate, 1) : yesterday,
+    after: endDate ? subDays(endDate, 1) : maxEndDate,
   };
   const endDisabledDays: Matcher[] = [
-    { after: yesterday },
+    { after: maxEndDate },
     ...(startDate ? [{ before: addDays(startDate, 1) }] : []),
   ];
 
@@ -176,7 +202,7 @@ export function DateRangeFields({
         error={errors.startError}
         disabled={disabled}
         disabledDays={startDisabledDays}
-        defaultMonth={yesterday}
+        defaultMonth={maxEndDate}
       />
       <DateField
         label="Fim"
@@ -185,7 +211,8 @@ export function DateRangeFields({
         error={errors.endError}
         disabled={disabled}
         disabledDays={endDisabledDays}
-        defaultMonth={yesterday}
+        defaultMonth={maxEndDate}
+        hint={`Cotações com defasagem de até ${dataLagDays} dias.`}
       />
     </div>
   );

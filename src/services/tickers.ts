@@ -38,7 +38,7 @@ const tickerHistoryResponseSchema = z.object({
 
 export async function fetchTickers(): Promise<Ticker[]> {
   const { results } = await request(
-    '/tickers?limit=2000',
+    '/tickers?limit=2000&sortBy=marketCap',
     tickersResponseSchema,
   );
   return results;
