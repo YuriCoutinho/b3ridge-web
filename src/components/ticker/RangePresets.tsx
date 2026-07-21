@@ -17,7 +17,7 @@ export function RangePresets({
   const labelId = useId();
 
   return (
-    <div className="flex w-full flex-col gap-1.5">
+    <div className="flex w-fit flex-col gap-1.5">
       <span
         id={labelId}
         className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
@@ -27,7 +27,6 @@ export function RangePresets({
 
       <ToggleGroup
         aria-labelledby={labelId}
-        className="w-full"
         variant="outline"
         size="sm"
         disabled={disabled}
