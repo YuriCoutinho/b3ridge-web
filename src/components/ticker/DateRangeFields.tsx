@@ -212,7 +212,7 @@ export function DateRangeFields({
         disabled={disabled}
         disabledDays={endDisabledDays}
         defaultMonth={maxEndDate}
-        hint={`Cotações disponíveis até ${dataLagDays} dias atrás.`}
+        hint={`Cotações com defasagem de até ${dataLagDays} dias.`}
       />
     </div>
   );

@@ -99,7 +99,7 @@ export function PriceChart({ selected, range }: PriceChartProps) {
   if (entries.some((entry) => entry.isPending)) {
     return (
       <ChartSection>
-        <Skeleton className="aspect-auto h-[360px] w-full lg:h-[460px] xl:h-[560px]" />
+        <Skeleton className="aspect-auto h-[40vh] max-h-[520px] min-h-[220px] w-full md:h-[50vh]" />
         <div className="flex flex-wrap gap-2">
           {selected.map((ticker) => (
             <Skeleton key={ticker.symbol} className="h-8 w-24 rounded-full" />
@@ -159,7 +159,7 @@ export function PriceChart({ selected, range }: PriceChartProps) {
 
       <ChartContainer
         config={config}
-        className="aspect-auto h-[360px] w-full lg:h-[460px] xl:h-[560px]"
+        className="aspect-auto h-[40vh] max-h-[520px] min-h-[220px] w-full md:h-[50vh]"
       >
         <LineChart
           accessibilityLayer
