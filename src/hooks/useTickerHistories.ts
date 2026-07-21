@@ -7,7 +7,12 @@ import {
 } from '@/services/tickers';
 import { isValidRange, type DateRange } from '@/lib/dateRange';
 
-type TickerHistories = Record<string, TickerHistoryPoint[] | undefined>;
+type TickerHistory = {
+  data: TickerHistoryPoint[];
+  isPending: boolean;
+};
+
+type TickerHistories = Record<string, TickerHistory>;
 
 export function useTickerHistories(tickers: Ticker[], range: DateRange) {
   const enabled = isValidRange(range);
@@ -15,7 +20,13 @@ export function useTickerHistories(tickers: Ticker[], range: DateRange) {
   const combine = useCallback(
     (results: UseQueryResult<TickerHistoryPoint[]>[]) =>
       Object.fromEntries(
-        tickers.map((ticker, index) => [ticker.symbol, results[index].data]),
+        tickers.map((ticker, index) => [
+          ticker.symbol,
+          {
+            data: results[index].data ?? [],
+            isPending: results[index].isPending,
+          },
+        ]),
       ) as TickerHistories,
     [tickers],
   );
