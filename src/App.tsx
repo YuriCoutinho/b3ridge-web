@@ -4,19 +4,20 @@ import { TickerSelector } from '@/components/TickerSelector';
 import { RangePresets } from '@/components/ticker/RangePresets';
 import { DateRangeFields } from '@/components/ticker/DateRangeFields';
 import { PriceChart } from '@/components/ticker/PriceChart';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { useTickerSelection } from '@/hooks/useTickerSelection';
 import { useDateRange } from '@/hooks/useDateRange';
-import { todayIso, validateRange } from '@/lib/dateRange';
+import { maxEndDateIso, validateRange } from '@/lib/dateRange';
 
 function App() {
   const { selected, setSelected } = useTickerSelection();
   const { range, activePreset, applyPreset, changeRange } = useDateRange();
 
   const hasSelection = selected.length > 0;
-  const rangeErrors = validateRange(range, todayIso());
+  const rangeErrors = validateRange(range, maxEndDateIso());
 
   return (
-    <>
+    <TooltipProvider>
       <Header />
 
       <FilterBar>
@@ -42,7 +43,7 @@ function App() {
         Dados via <span className="font-medium text-foreground">brapi.dev</span>{' '}
         · preview simulado
       </footer>
-    </>
+    </TooltipProvider>
   );
 }
 

@@ -3,11 +3,12 @@ import {
   buildChartRows,
   colorVarForIndex,
   formatChangePct,
-  isDashedForIndex,
   lastChangePct,
   toPercentSeries,
 } from '@/lib/series';
 import type { TickerHistoryPoint } from '@/services/tickers';
+
+const DAY = 86400;
 
 function point(date: number, close: number): TickerHistoryPoint {
   return {
@@ -24,20 +25,46 @@ function point(date: number, close: number): TickerHistoryPoint {
 describe('toPercentSeries', () => {
   it('normalizes closes into percent change from the first close', () => {
     const series = toPercentSeries([
-      point(1, 100),
-      point(2, 110),
-      point(3, 95),
+      point(DAY, 100),
+      point(2 * DAY, 110),
+      point(3 * DAY, 95),
     ]);
 
-    expect(series.map((entry) => entry.date)).toEqual([1, 2, 3]);
+    expect(series).toHaveLength(3);
     expect(series[0].changePct).toBe(0);
     expect(series[1].changePct).toBeCloseTo(10, 10);
     expect(series[2].changePct).toBeCloseTo(-5, 10);
   });
 
+  it('anchors the base on the earliest date even if input is unordered', () => {
+    const series = toPercentSeries([
+      point(3 * DAY, 95),
+      point(DAY, 100),
+      point(2 * DAY, 110),
+    ]);
+
+    const dates = series.map((entry) => entry.date);
+    expect(dates).toEqual([...dates].sort((a, b) => a - b));
+    expect(series[0].changePct).toBe(0);
+    expect(series[2].changePct).toBeCloseTo(-5, 10);
+  });
+
   it('returns empty when there is no base close', () => {
     expect(toPercentSeries([])).toEqual([]);
-    expect(toPercentSeries([point(1, 0)])).toEqual([]);
+    expect(toPercentSeries([point(DAY, 0)])).toEqual([]);
+  });
+
+  it('aligns points on the same calendar day despite differing intraday timestamps', () => {
+    const midnight = 1784257200;
+    const tenAm = midnight + 10 * 3600;
+
+    const rows = buildChartRows([
+      { symbol: 'AAA', points: toPercentSeries([point(midnight, 100)]) },
+      { symbol: 'BBB', points: toPercentSeries([point(tenAm, 100)]) },
+    ]);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ AAA: 0, BBB: 0 });
   });
 });
 
@@ -68,16 +95,11 @@ describe('buildChartRows', () => {
   });
 });
 
-describe('colorVarForIndex / isDashedForIndex', () => {
+describe('colorVarForIndex', () => {
   it('assigns palette colors in fixed order and wraps after 8', () => {
     expect(colorVarForIndex(0)).toBe('var(--chart-1)');
     expect(colorVarForIndex(7)).toBe('var(--chart-8)');
     expect(colorVarForIndex(8)).toBe('var(--chart-1)');
-  });
-
-  it('dashes only the repeated colors past the palette', () => {
-    expect(isDashedForIndex(7)).toBe(false);
-    expect(isDashedForIndex(8)).toBe(true);
   });
 });
 

@@ -56,9 +56,9 @@ describe('PriceChart', () => {
     expect(
       screen.getByText('Alguns ativos não carregaram.'),
     ).toBeInTheDocument();
-    expect(screen.getByText(/VALE3: timeout/)).toBeInTheDocument();
-    expect(screen.getByText('PETR4')).toBeInTheDocument();
-    expect(screen.getByText('+10.00%')).toBeInTheDocument();
+    expect(screen.getByText('VALE3')).toBeInTheDocument();
+    expect(screen.queryByText(/timeout/)).not.toBeInTheDocument();
+    expect(screen.getByRole('listitem')).toHaveTextContent('PETR4');
   });
 
   it('shows a total-failure error state when every series fails', () => {
@@ -72,6 +72,6 @@ describe('PriceChart', () => {
     expect(
       screen.getByText('Não foi possível carregar as cotações.'),
     ).toBeInTheDocument();
-    expect(screen.queryByText('+10.00%')).not.toBeInTheDocument();
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
   });
 });

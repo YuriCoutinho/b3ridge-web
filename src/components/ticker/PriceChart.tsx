@@ -11,13 +11,7 @@ import { TriangleAlertIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
@@ -25,13 +19,14 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ChartTooltipRow } from '@/components/ticker/ChartTooltipRow';
+import { EmptyTickerSelection } from '@/components/ticker/EmptyTickerSelection';
 import { TickerSummaryList } from '@/components/ticker/TickerSummaryList';
 import { useTickerHistories } from '@/hooks/useTickerHistories';
-import { isValidRange, todayIso, type DateRange } from '@/lib/dateRange';
+import { isValidRange, maxEndDateIso, type DateRange } from '@/lib/dateRange';
 import {
   buildChartRows,
   colorVarForIndex,
-  isDashedForIndex,
   lastChangePct,
   toPercentSeries,
 } from '@/lib/series';
@@ -42,7 +37,7 @@ interface PriceChartProps {
   range: DateRange;
 }
 
-function ChartCard({
+function ChartSection({
   description,
   children,
 }: {
@@ -50,13 +45,19 @@ function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Gráfico de Preços</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">{children}</CardContent>
-    </Card>
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-lg font-semibold tracking-tight">
+          Comparativo de ativos
+        </h2>
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+      </div>
+      <Card>
+        <CardContent className="flex flex-col gap-4">{children}</CardContent>
+      </Card>
+    </section>
   );
 }
 
@@ -73,21 +74,19 @@ export function PriceChart({ selected, range }: PriceChartProps) {
 
   if (selected.length === 0) {
     return (
-      <ChartCard>
-        <p className="text-sm text-muted-foreground">
-          Nenhum ativo selecionado.
-        </p>
-      </ChartCard>
+      <ChartSection>
+        <EmptyTickerSelection />
+      </ChartSection>
     );
   }
 
-  if (!isValidRange(range, todayIso())) {
+  if (!isValidRange(range, maxEndDateIso())) {
     return (
-      <ChartCard>
+      <ChartSection>
         <p className="text-sm text-muted-foreground">
           Ajuste o período para consultar as cotações.
         </p>
-      </ChartCard>
+      </ChartSection>
     );
   }
 
@@ -99,48 +98,37 @@ export function PriceChart({ selected, range }: PriceChartProps) {
 
   if (entries.some((entry) => entry.isPending)) {
     return (
-      <ChartCard>
-        <Skeleton className="aspect-auto h-[320px] w-full" />
+      <ChartSection>
+        <Skeleton className="aspect-auto h-[360px] w-full lg:h-[460px] xl:h-[560px]" />
         <div className="flex flex-wrap gap-2">
           {selected.map((ticker) => (
             <Skeleton key={ticker.symbol} className="h-8 w-24 rounded-full" />
           ))}
         </div>
-      </ChartCard>
+      </ChartSection>
     );
   }
 
   const failed = entries.filter((entry) => entry.isError);
+  const failedSymbols = failed.map((entry) => entry.ticker.symbol).join(', ');
   const series = entries
     .filter((entry) => !entry.isError)
-    .map((entry) => {
-      const points = toPercentSeries(entry.data);
-      return {
-        symbol: entry.ticker.symbol,
-        points,
-        changePct: lastChangePct(points),
-        colorVar: colorVarForIndex(entry.index),
-        dashed: isDashedForIndex(entry.index),
-      };
-    })
+    .map((entry) => ({
+      symbol: entry.ticker.symbol,
+      points: toPercentSeries(entry.data),
+      colorVar: colorVarForIndex(entry.index),
+    }))
     .filter((item) => item.points.length > 0);
 
   if (series.length === 0) {
     return (
-      <ChartCard>
+      <ChartSection>
         <Alert variant="destructive">
           <TriangleAlertIcon />
           <AlertTitle>Não foi possível carregar as cotações.</AlertTitle>
-          <AlertDescription>
-            {failed.map((entry) => (
-              <span key={entry.ticker.symbol}>
-                {entry.ticker.symbol}:{' '}
-                {entry.error?.message ?? 'falha desconhecida'}
-              </span>
-            ))}
-          </AlertDescription>
+          <AlertDescription>Tente novamente em instantes.</AlertDescription>
         </Alert>
-      </ChartCard>
+      </ChartSection>
     );
   }
 
@@ -153,30 +141,26 @@ export function PriceChart({ selected, range }: PriceChartProps) {
   );
   const summaries = series.map((item) => ({
     symbol: item.symbol,
-    changePct: item.changePct,
+    changePct: lastChangePct(item.points),
     colorVar: item.colorVar,
   }));
 
   return (
-    <ChartCard
+    <ChartSection
       description={`${rows.length} pregões · variação % desde o início do período`}
     >
       {failed.length > 0 && (
         <Alert>
           <TriangleAlertIcon />
           <AlertTitle>Alguns ativos não carregaram.</AlertTitle>
-          <AlertDescription>
-            {failed.map((entry) => (
-              <span key={entry.ticker.symbol}>
-                {entry.ticker.symbol}:{' '}
-                {entry.error?.message ?? 'falha desconhecida'}
-              </span>
-            ))}
-          </AlertDescription>
+          <AlertDescription>{failedSymbols}</AlertDescription>
         </Alert>
       )}
 
-      <ChartContainer config={config} className="aspect-auto h-[320px] w-full">
+      <ChartContainer
+        config={config}
+        className="aspect-auto h-[360px] w-full lg:h-[460px] xl:h-[560px]"
+      >
         <LineChart
           accessibilityLayer
           data={rows}
@@ -197,6 +181,7 @@ export function PriceChart({ selected, range }: PriceChartProps) {
             axisLine={false}
             tickMargin={8}
             width={48}
+            padding={{ top: 8, bottom: 8 }}
             tickFormatter={formatPercentTick}
           />
           <ChartTooltip
@@ -205,6 +190,12 @@ export function PriceChart({ selected, range }: PriceChartProps) {
                 labelFormatter={(_, payload) =>
                   formatDateTick(payload?.[0]?.payload.date)
                 }
+                formatter={(value, name) => (
+                  <ChartTooltipRow
+                    symbol={String(name)}
+                    changePct={Number(value)}
+                  />
+                )}
               />
             }
           />
@@ -215,8 +206,13 @@ export function PriceChart({ selected, range }: PriceChartProps) {
               type="monotone"
               stroke={`var(--color-${item.symbol})`}
               strokeWidth={2}
-              strokeDasharray={item.dashed ? '6 4' : undefined}
-              dot={false}
+              dot={{
+                r: 3,
+                fill: 'var(--background)',
+                stroke: `var(--color-${item.symbol})`,
+                strokeWidth: 2,
+              }}
+              activeDot={{ r: 4 }}
               connectNulls
             />
           ))}
@@ -224,6 +220,6 @@ export function PriceChart({ selected, range }: PriceChartProps) {
       </ChartContainer>
 
       <TickerSummaryList items={summaries} />
-    </ChartCard>
+    </ChartSection>
   );
 }

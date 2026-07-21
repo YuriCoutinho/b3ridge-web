@@ -14,21 +14,18 @@ describe('TickerSummaryList', () => {
 
     const chips = screen.getAllByRole('listitem');
     expect(
-      chips.map((chip) => within(chip).getByText(/PETR4|VALE3/).textContent),
+      chips.map((chip) => within(chip).getByText(/^[A-Z]+\d+$/).textContent),
     ).toEqual(['PETR4', 'VALE3']);
   });
 
   it('signs the change and colors gains and losses differently', () => {
     render(<TickerSummaryList items={items} />);
 
-    const gain = screen.getByText('+5.62%');
-    const loss = screen.getByText('-4.00%');
-
-    expect(gain).toHaveClass('text-success');
-    expect(loss).toHaveClass('text-destructive');
+    expect(screen.getByText('+5.62%')).toHaveClass('text-success');
+    expect(screen.getByText('-4.00%')).toHaveClass('text-destructive');
   });
 
-  it('paints the dot with the same color used in the chart', () => {
+  it('paints each dot with the same color used in the chart', () => {
     const { container } = render(<TickerSummaryList items={items} />);
     const dots = container.querySelectorAll('span[aria-hidden="true"]');
 

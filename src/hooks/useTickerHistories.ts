@@ -5,7 +5,7 @@ import {
   type Ticker,
   type TickerHistoryPoint,
 } from '@/services/tickers';
-import { isValidRange, todayIso, type DateRange } from '@/lib/dateRange';
+import { isValidRange, maxEndDateIso, type DateRange } from '@/lib/dateRange';
 
 type TickerHistory = {
   data: TickerHistoryPoint[];
@@ -17,7 +17,7 @@ type TickerHistory = {
 type TickerHistories = Record<string, TickerHistory>;
 
 export function useTickerHistories(tickers: Ticker[], range: DateRange) {
-  const enabled = isValidRange(range, todayIso());
+  const enabled = isValidRange(range, maxEndDateIso());
 
   const combine = useCallback(
     (results: UseQueryResult<TickerHistoryPoint[]>[]) =>
