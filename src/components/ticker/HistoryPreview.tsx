@@ -1,5 +1,5 @@
 import type { Ticker } from '@/services/tickers';
-import type { DateRange } from '@/lib/dateRange';
+import { isValidRange, todayIso, type DateRange } from '@/lib/dateRange';
 import { useTickerHistories } from '@/hooks/useTickerHistories';
 
 interface HistoryPreviewProps {
@@ -12,6 +12,10 @@ export function HistoryPreview({ selected, range }: HistoryPreviewProps) {
 
   if (selected.length === 0) {
     return <p>Nenhum ativo selecionado.</p>;
+  }
+
+  if (!isValidRange(range, todayIso())) {
+    return <p>Ajuste o período para consultar as cotações.</p>;
   }
 
   return (

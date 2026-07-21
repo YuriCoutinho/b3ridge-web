@@ -1,7 +1,19 @@
+import {
+  format,
+  isValid,
+  parse,
+  startOfYear,
+  subDays,
+  subMonths,
+  subYears,
+} from 'date-fns';
+
 export interface DateRange {
   startDate: string;
   endDate: string;
 }
+
+const isoFormat = 'yyyy-MM-dd';
 
 export type RangePreset = '5d' | '1m' | '3m' | '6m' | '1y' | 'ytd';
 
@@ -14,60 +26,19 @@ export const rangePresets: { id: RangePreset; label: string }[] = [
   { id: 'ytd', label: 'YTD' },
 ];
 
-function toIsoDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function subtractDays(date: Date, days: number): Date {
-  const clonedDate = new Date(date);
-  const shiftedDate = new Date(
-    clonedDate.getFullYear(),
-    clonedDate.getMonth(),
-    clonedDate.getDate() - days,
-  );
-  return shiftedDate;
-}
-
-function subtractMonths(date: Date, months: number): Date {
-  const clonedDate = new Date(date);
-  const shiftedDate = new Date(
-    clonedDate.getFullYear(),
-    clonedDate.getMonth() - months,
-    clonedDate.getDate(),
-  );
-  return shiftedDate;
-}
-
-function subtractYears(date: Date, years: number): Date {
-  const clonedDate = new Date(date);
-  const shiftedDate = new Date(
-    clonedDate.getFullYear() - years,
-    clonedDate.getMonth(),
-    clonedDate.getDate(),
-  );
-  return shiftedDate;
-}
-
-function startOfYear(date: Date): Date {
-  return new Date(date.getFullYear(), 0, 1);
-}
-
 const startResolvers: Record<RangePreset, (endDate: Date) => Date> = {
-  '5d': (endDate) => subtractDays(endDate, 5),
-  '1m': (endDate) => subtractMonths(endDate, 1),
-  '3m': (endDate) => subtractMonths(endDate, 3),
-  '6m': (endDate) => subtractMonths(endDate, 6),
-  '1y': (endDate) => subtractYears(endDate, 1),
+  '5d': (endDate) => subDays(endDate, 5),
+  '1m': (endDate) => subMonths(endDate, 1),
+  '3m': (endDate) => subMonths(endDate, 3),
+  '6m': (endDate) => subMonths(endDate, 6),
+  '1y': (endDate) => subYears(endDate, 1),
   ytd: (endDate) => startOfYear(endDate),
 };
 
 export function resolveRange(preset: RangePreset): DateRange {
-  const endDate = subtractDays(new Date(), 1);
+  const endDate = subDays(new Date(), 1);
   const startDate = startResolvers[preset](endDate);
-  return { startDate: toIsoDate(startDate), endDate: toIsoDate(endDate) };
+  return { startDate: dateToIso(startDate), endDate: dateToIso(endDate) };
 }
 
 export function matchPreset(range: DateRange): RangePreset | null {
@@ -83,16 +54,45 @@ export function matchPreset(range: DateRange): RangePreset | null {
 }
 
 export function todayIso(): string {
-  return toIsoDate(new Date());
+  return dateToIso(new Date());
 }
 
-export function isValidRange(
+export function yesterdayIso(): string {
+  return dateToIso(subDays(new Date(), 1));
+}
+
+export function isoToDate(iso: string): Date | undefined {
+  const parsed = parse(iso, isoFormat, new Date());
+  return isValid(parsed) ? parsed : undefined;
+}
+
+export function dateToIso(date: Date): string {
+  return format(date, isoFormat);
+}
+
+export interface RangeErrors {
+  startError: string | null;
+  endError: string | null;
+}
+
+const startAfterEndMessage = 'A data inicial deve ser anterior à final.';
+const endAfterYesterdayMessage = 'A data final deve ser no máximo ontem.';
+
+export function validateRange(
   { startDate, endDate }: DateRange,
   today: string,
-): boolean {
-  const hasBothDates = Boolean(startDate && endDate);
-  const startsBeforeEnd = startDate < endDate;
-  const endIsBeforeToday = endDate < today;
+): RangeErrors {
+  const endError =
+    endDate && endDate >= today ? endAfterYesterdayMessage : null;
+  const startError =
+    startDate && endDate && startDate >= endDate ? startAfterEndMessage : null;
 
-  return hasBothDates && startsBeforeEnd && endIsBeforeToday;
+  return { startError, endError };
+}
+
+export function isValidRange(range: DateRange, today: string): boolean {
+  const { startError, endError } = validateRange(range, today);
+  const hasBothDates = Boolean(range.startDate && range.endDate);
+
+  return hasBothDates && !startError && !endError;
 }
