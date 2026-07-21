@@ -1,7 +1,7 @@
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { TickerSelector } from '@/components/TickerSelector';
-import { PeriodPresets } from '@/components/PeriodPresets';
+import { RangePresets } from '@/components/ticker/RangePresets';
 import { HistoryPreview } from '@/components/HistoryPreview';
 import { useTickerSelection } from '@/hooks/useTickerSelection';
 import { useDateRange } from '@/hooks/useDateRange';
@@ -16,7 +16,7 @@ function App() {
       <div className="flex flex-1 flex-col md:flex-row">
         <Sidebar>
           <TickerSelector selected={selected} onSelectionChange={setSelected} />
-          <PeriodPresets
+          <RangePresets
             value={activePreset}
             onSelectPreset={applyPreset}
             disabled={selected.length === 0}

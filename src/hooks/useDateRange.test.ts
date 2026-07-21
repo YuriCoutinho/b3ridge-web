@@ -3,10 +3,10 @@ import { act, renderHook } from '@testing-library/react';
 import { useDateRange } from '@/hooks/useDateRange';
 
 describe('useDateRange', () => {
-  it('starts on the default preset', () => {
+  it('starts with no active preset', () => {
     const { result } = renderHook(() => useDateRange());
 
-    expect(result.current.activePreset).toBe('5d');
+    expect(result.current.activePreset).toBeNull();
   });
 
   it('applyPreset switches the active preset', () => {

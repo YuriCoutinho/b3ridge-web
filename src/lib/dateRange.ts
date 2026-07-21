@@ -14,8 +14,6 @@ export const rangePresets: { id: RangePreset; label: string }[] = [
   { id: 'ytd', label: 'YTD' },
 ];
 
-export const defaultPreset: RangePreset = '5d';
-
 function toIsoDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -24,21 +22,33 @@ function toIsoDate(date: Date): string {
 }
 
 function subtractDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() - days);
-  return result;
+  const clonedDate = new Date(date);
+  const shiftedDate = new Date(
+    clonedDate.getFullYear(),
+    clonedDate.getMonth(),
+    clonedDate.getDate() - days,
+  );
+  return shiftedDate;
 }
 
 function subtractMonths(date: Date, months: number): Date {
-  const result = new Date(date);
-  result.setMonth(result.getMonth() - months);
-  return result;
+  const clonedDate = new Date(date);
+  const shiftedDate = new Date(
+    clonedDate.getFullYear(),
+    clonedDate.getMonth() - months,
+    clonedDate.getDate(),
+  );
+  return shiftedDate;
 }
 
 function subtractYears(date: Date, years: number): Date {
-  const result = new Date(date);
-  result.setFullYear(result.getFullYear() - years);
-  return result;
+  const clonedDate = new Date(date);
+  const shiftedDate = new Date(
+    clonedDate.getFullYear() - years,
+    clonedDate.getMonth(),
+    clonedDate.getDate(),
+  );
+  return shiftedDate;
 }
 
 function startOfYear(date: Date): Date {
@@ -60,6 +70,17 @@ export function resolveRange(preset: RangePreset): DateRange {
   return { startDate: toIsoDate(startDate), endDate: toIsoDate(endDate) };
 }
 
-export function isValidRange({ startDate, endDate }: DateRange): boolean {
-  return Boolean(startDate && endDate && startDate <= endDate);
+export function todayIso(): string {
+  return toIsoDate(new Date());
+}
+
+export function isValidRange(
+  { startDate, endDate }: DateRange,
+  today: string,
+): boolean {
+  const hasBothDates = Boolean(startDate && endDate);
+  const startsBeforeEnd = startDate < endDate;
+  const endIsBeforeToday = endDate < today;
+
+  return hasBothDates && startsBeforeEnd && endIsBeforeToday;
 }

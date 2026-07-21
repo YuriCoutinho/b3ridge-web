@@ -3,17 +3,17 @@ import { useId } from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { rangePresets, type RangePreset } from '@/lib/dateRange';
 
-interface PeriodPresetsProps {
-  value: RangePreset | 'custom';
+interface RangePresetsProps {
+  value: RangePreset | 'custom' | null;
   onSelectPreset: (preset: RangePreset) => void;
   disabled: boolean;
 }
 
-export function PeriodPresets({
+export function RangePresets({
   value,
   onSelectPreset,
   disabled,
-}: PeriodPresetsProps) {
+}: RangePresetsProps) {
   const labelId = useId();
 
   return (
@@ -31,7 +31,7 @@ export function PeriodPresets({
         variant="outline"
         size="sm"
         disabled={disabled}
-        value={value === 'custom' ? [] : [value]}
+        value={value && value !== 'custom' ? [value] : []}
         onValueChange={(groupValue) => {
           const [next] = groupValue as RangePreset[];
           if (next) {

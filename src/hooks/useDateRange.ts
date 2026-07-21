@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import {
-  defaultPreset,
   resolveRange,
   type DateRange,
   type RangePreset,
 } from '@/lib/dateRange';
 
-type ActivePreset = RangePreset | 'custom';
+type ActivePreset = RangePreset | 'custom' | null;
+
+const emptyRange: DateRange = { startDate: '', endDate: '' };
 
 export function useDateRange() {
-  const [range, setRange] = useState<DateRange>(() =>
-    resolveRange(defaultPreset),
-  );
-  const [activePreset, setActivePreset] = useState<ActivePreset>(defaultPreset);
+  const [range, setRange] = useState<DateRange>(emptyRange);
+  const [activePreset, setActivePreset] = useState<ActivePreset>(null);
 
   function applyPreset(preset: RangePreset) {
     setRange(resolveRange(preset));

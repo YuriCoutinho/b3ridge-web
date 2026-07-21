@@ -48,19 +48,39 @@ describe('resolveRange', () => {
 });
 
 describe('isValidRange', () => {
+  const today = '2026-07-20';
+
   it('accepts a coherent range', () => {
     expect(
-      isValidRange({ startDate: '2026-07-12', endDate: '2026-07-19' }),
+      isValidRange({ startDate: '2026-07-12', endDate: '2026-07-19' }, today),
     ).toBe(true);
   });
 
   it('rejects a start after the end', () => {
     expect(
-      isValidRange({ startDate: '2026-07-19', endDate: '2026-07-12' }),
+      isValidRange({ startDate: '2026-07-19', endDate: '2026-07-12' }, today),
+    ).toBe(false);
+  });
+
+  it('rejects a start equal to the end', () => {
+    expect(
+      isValidRange({ startDate: '2026-07-19', endDate: '2026-07-19' }, today),
     ).toBe(false);
   });
 
   it('rejects missing dates', () => {
-    expect(isValidRange({ startDate: '', endDate: '' })).toBe(false);
+    expect(isValidRange({ startDate: '', endDate: '' }, today)).toBe(false);
+  });
+
+  it('rejects an end on today', () => {
+    expect(
+      isValidRange({ startDate: '2026-07-19', endDate: today }, today),
+    ).toBe(false);
+  });
+
+  it('rejects an end in the future', () => {
+    expect(
+      isValidRange({ startDate: '2026-07-19', endDate: '2026-07-21' }, today),
+    ).toBe(false);
   });
 });
