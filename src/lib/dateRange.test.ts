@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { resolveRange, isValidRange, matchPreset } from '@/lib/dateRange';
+import {
+  resolveRange,
+  isValidRange,
+  matchPreset,
+  validateRange,
+} from '@/lib/dateRange';
 
 describe('resolveRange', () => {
   beforeEach(() => {
@@ -109,5 +114,42 @@ describe('isValidRange', () => {
     expect(
       isValidRange({ startDate: '2026-07-19', endDate: '2026-07-21' }, today),
     ).toBe(false);
+  });
+});
+
+describe('validateRange', () => {
+  const today = '2026-07-20';
+
+  it('returns no errors for a coherent range', () => {
+    expect(
+      validateRange({ startDate: '2026-07-12', endDate: '2026-07-19' }, today),
+    ).toEqual({ startError: null, endError: null });
+  });
+
+  it('flags the start when it is not before the end', () => {
+    const { startError } = validateRange(
+      { startDate: '2026-07-19', endDate: '2026-07-19' },
+      today,
+    );
+
+    expect(startError).not.toBeNull();
+  });
+
+  it('flags the end when it falls on today', () => {
+    const { endError } = validateRange(
+      { startDate: '2026-07-19', endDate: today },
+      today,
+    );
+
+    expect(endError).not.toBeNull();
+  });
+
+  it('flags the end when it is in the future', () => {
+    const { endError } = validateRange(
+      { startDate: '2026-07-19', endDate: '2026-07-25' },
+      today,
+    );
+
+    expect(endError).not.toBeNull();
   });
 });
