@@ -11,25 +11,37 @@ describe('resolveRange', () => {
     vi.useRealTimers();
   });
 
-  it('anchors the end at D-1 and moves the start back by the preset days', () => {
-    expect(resolveRange('7d')).toEqual({
-      startDate: '2026-07-12',
+  it('anchors the end at D-1 for every preset', () => {
+    expect(resolveRange('5d').endDate).toBe('2026-07-19');
+    expect(resolveRange('ytd').endDate).toBe('2026-07-19');
+  });
+
+  it('moves the start back by 5 days', () => {
+    expect(resolveRange('5d')).toEqual({
+      startDate: '2026-07-14',
       endDate: '2026-07-19',
     });
   });
 
-  it('resolves the 1 month preset', () => {
-    expect(resolveRange('1m')).toEqual({
-      startDate: '2026-06-19',
-      endDate: '2026-07-19',
-    });
+  it('moves the start back by calendar months', () => {
+    expect(resolveRange('1m').startDate).toBe('2026-06-19');
+    expect(resolveRange('3m').startDate).toBe('2026-04-19');
+    expect(resolveRange('6m').startDate).toBe('2026-01-19');
+  });
+
+  it('moves the start back by a calendar year', () => {
+    expect(resolveRange('1y').startDate).toBe('2025-07-19');
+  });
+
+  it('anchors the year-to-date start on January 1st', () => {
+    expect(resolveRange('ytd').startDate).toBe('2026-01-01');
   });
 
   it('anchors on the local calendar day near midnight, not on UTC', () => {
     vi.setSystemTime(new Date('2026-07-20T02:00:00Z'));
 
-    expect(resolveRange('7d')).toEqual({
-      startDate: '2026-07-11',
+    expect(resolveRange('5d')).toEqual({
+      startDate: '2026-07-13',
       endDate: '2026-07-18',
     });
   });
