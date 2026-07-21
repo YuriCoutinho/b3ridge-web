@@ -9,15 +9,10 @@ export function Header() {
       <h1 className="text-base font-semibold text-sidebar-foreground">
         B3ridge
       </h1>
-      <span
-        aria-hidden="true"
-        className="hidden text-muted-foreground sm:inline"
-      >
+      <span aria-hidden="true" className="text-muted-foreground">
         ·
       </span>
-      <span className="hidden text-sm text-muted-foreground sm:inline">
-        Market data bridge
-      </span>
+      <span className="text-sm text-muted-foreground">Market data bridge</span>
     </header>
   );
 }
