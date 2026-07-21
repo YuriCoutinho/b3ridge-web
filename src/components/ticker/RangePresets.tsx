@@ -4,7 +4,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { rangePresets, type RangePreset } from '@/lib/dateRange';
 
 interface RangePresetsProps {
-  value: RangePreset | 'custom' | null;
+  value: RangePreset | null;
   onSelectPreset: (preset: RangePreset) => void;
   disabled: boolean;
 }
@@ -31,7 +31,7 @@ export function RangePresets({
         variant="outline"
         size="sm"
         disabled={disabled}
-        value={value && value !== 'custom' ? [value] : []}
+        value={value ? [value] : []}
         onValueChange={(groupValue) => {
           const [next] = groupValue as RangePreset[];
           if (next) {

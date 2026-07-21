@@ -70,6 +70,18 @@ export function resolveRange(preset: RangePreset): DateRange {
   return { startDate: toIsoDate(startDate), endDate: toIsoDate(endDate) };
 }
 
+export function matchPreset(range: DateRange): RangePreset | null {
+  const preset = rangePresets.find((preset) => {
+    const resolved = resolveRange(preset.id);
+    return (
+      resolved.startDate === range.startDate &&
+      resolved.endDate === range.endDate
+    );
+  });
+
+  return preset?.id ?? null;
+}
+
 export function todayIso(): string {
   return toIsoDate(new Date());
 }

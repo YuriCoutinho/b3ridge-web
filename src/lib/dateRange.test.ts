@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { resolveRange, isValidRange } from '@/lib/dateRange';
+import { resolveRange, isValidRange, matchPreset } from '@/lib/dateRange';
 
 describe('resolveRange', () => {
   beforeEach(() => {
@@ -44,6 +44,33 @@ describe('resolveRange', () => {
       startDate: '2026-07-13',
       endDate: '2026-07-18',
     });
+  });
+});
+
+describe('matchPreset', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-20T10:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns the preset whose resolved range matches exactly', () => {
+    expect(matchPreset(resolveRange('3m'))).toBe('3m');
+  });
+
+  it('returns null when the end is today instead of D-1', () => {
+    expect(
+      matchPreset({ startDate: '2026-07-15', endDate: '2026-07-20' }),
+    ).toBeNull();
+  });
+
+  it('returns null for a range that matches no preset', () => {
+    expect(
+      matchPreset({ startDate: '2026-02-03', endDate: '2026-05-11' }),
+    ).toBeNull();
   });
 });
 
