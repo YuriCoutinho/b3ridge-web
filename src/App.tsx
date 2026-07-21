@@ -1,6 +1,6 @@
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
-import { TickerSelect } from '@/components/TickerSelect';
+import { TickerSelector } from '@/components/TickerSelector';
 import { HistoryRangeControls } from '@/components/HistoryRangeControls';
 import { HistoryPreview } from '@/components/HistoryPreview';
 import { useTickerSelection } from '@/hooks/useTickerSelection';
@@ -13,10 +13,9 @@ function App() {
   return (
     <>
       <Header />
-
-      <div className="flex flex-1 flex-col lg:flex-row">
+      <div className="flex flex-1 flex-col md:flex-row">
         <Sidebar>
-          <TickerSelect selected={selected} onSelect={setSelected} />
+          <TickerSelector selected={selected} onSelectionChange={setSelected} />
           <HistoryRangeControls
             range={range}
             activePreset={activePreset}
@@ -25,14 +24,14 @@ function App() {
           />
         </Sidebar>
 
-        <main className="min-w-0 flex-1 p-4 lg:p-6">
+        <main className="min-w-0 flex-1 p-4 md:p-6">
           <HistoryPreview selected={selected} range={range} />
         </main>
       </div>
 
-      <footer className="border-t border-grey-200 p-4 text-center text-xs text-grey-400 lg:hidden">
-        Dados via <span className="font-medium text-grey-500">brapi.dev</span> ·
-        preview simulado
+      <footer className="border-t border-border p-4 text-center text-xs text-muted-foreground md:hidden">
+        Dados via <span className="font-medium text-foreground">brapi.dev</span>{' '}
+        · preview simulado
       </footer>
     </>
   );

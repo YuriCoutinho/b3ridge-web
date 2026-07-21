@@ -6,11 +6,11 @@ interface SidebarProps {
 
 export function Sidebar({ children }: SidebarProps) {
   return (
-    <aside className="flex flex-col gap-6 border-b border-grey-200 p-4 lg:w-72 lg:shrink-0 lg:border-r lg:border-b-0 lg:p-6">
+    <aside className="flex flex-col gap-6 border-b border-sidebar-border bg-sidebar p-4 text-sidebar-foreground md:w-72 md:shrink-0 md:border-r md:border-b-0 md:p-6">
       {children}
-      <footer className="mt-auto hidden text-xs text-grey-400 lg:block">
-        Dados via <span className="font-medium text-grey-500">brapi.dev</span> ·
-        preview simulado
+      <footer className="mt-auto hidden text-xs text-muted-foreground md:block">
+        Dados via <span className="font-medium text-foreground">brapi.dev</span>{' '}
+        · preview simulado
       </footer>
     </aside>
   );

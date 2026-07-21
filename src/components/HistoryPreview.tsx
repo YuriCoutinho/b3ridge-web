@@ -17,15 +17,15 @@ export function HistoryPreview({ selected, range }: HistoryPreviewProps) {
   return (
     <ul>
       {selected.map((ticker) => {
-        const points = histories[ticker.symbol];
-        const last = points?.at(-1);
+        const { data, isPending } = histories[ticker.symbol];
+        const last = data.at(-1);
 
         return (
           <li key={ticker.symbol}>
             <strong>{ticker.symbol}</strong>{' '}
-            {points
-              ? `${points.length} pontos · último fechamento ${last?.close}`
-              : 'carregando…'}
+            {isPending
+              ? 'carregando…'
+              : `${data.length} pontos${last ? ` · último fechamento ${last.close}` : ''}`}
           </li>
         );
       })}

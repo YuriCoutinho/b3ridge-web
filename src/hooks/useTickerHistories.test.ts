@@ -42,8 +42,8 @@ describe('useTickerHistories', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.PETR4).toEqual([pointFor('PETR4')]);
-      expect(result.current.VALE3).toEqual([pointFor('VALE3')]);
+      expect(result.current.PETR4.data).toEqual([pointFor('PETR4')]);
+      expect(result.current.VALE3.data).toEqual([pointFor('VALE3')]);
     });
     expect(fetchTickerHistory).toHaveBeenCalledTimes(2);
   });
