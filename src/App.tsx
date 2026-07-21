@@ -3,7 +3,7 @@ import { FilterBar } from '@/components/FilterBar';
 import { TickerSelector } from '@/components/TickerSelector';
 import { RangePresets } from '@/components/ticker/RangePresets';
 import { DateRangeFields } from '@/components/ticker/DateRangeFields';
-import { HistoryPreview } from '@/components/ticker/HistoryPreview';
+import { PriceChart } from '@/components/ticker/PriceChart';
 import { useTickerSelection } from '@/hooks/useTickerSelection';
 import { useDateRange } from '@/hooks/useDateRange';
 import { todayIso, validateRange } from '@/lib/dateRange';
@@ -35,7 +35,7 @@ function App() {
       </FilterBar>
 
       <main className="min-w-0 flex-1 p-4 md:p-6">
-        <HistoryPreview selected={selected} range={range} />
+        <PriceChart selected={selected} range={range} />
       </main>
 
       <footer className="border-t border-border p-4 text-center text-xs text-muted-foreground">
