@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/combobox';
 import { Button } from '@/components/ui/button';
 import { useTickers } from '@/hooks/useTickers';
+import { MAX_SELECTED_TICKERS } from '@/hooks/useTickerSelection';
 import type { Ticker } from '@/services/tickers';
 
 const MAX_VISIBLE_CHIPS = 2;
@@ -33,6 +34,9 @@ export function TickerSelector({
   const { tickers, isPending, isError, refetch } = useTickers();
 
   const hasSelection = selected.length > 0;
+  const atLimit = selected.length >= MAX_SELECTED_TICKERS;
+  const isSelected = (ticker: Ticker) =>
+    selected.some((item) => item.symbol === ticker.symbol);
 
   return (
     <div className="flex w-full max-w-60 flex-col gap-1.5">
@@ -88,7 +92,10 @@ export function TickerSelector({
               );
             }}
           </ComboboxValue>
-          <ComboboxTrigger className="ml-auto self-center text-muted-foreground" />
+          <ComboboxTrigger
+            className="ml-auto self-center text-muted-foreground"
+            onMouseDown={(event) => event.preventDefault()}
+          />
         </ComboboxChips>
         <ComboboxContent anchor={anchor}>
           <ComboboxEmpty>
@@ -107,7 +114,11 @@ export function TickerSelector({
           </ComboboxEmpty>
           <ComboboxList>
             {(ticker: Ticker) => (
-              <ComboboxItem key={ticker.symbol} value={ticker}>
+              <ComboboxItem
+                key={ticker.symbol}
+                value={ticker}
+                disabled={atLimit && !isSelected(ticker)}
+              >
                 <div className="flex flex-col">
                   <span className="font-medium text-foreground">
                     {ticker.symbol}
@@ -121,6 +132,12 @@ export function TickerSelector({
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
+
+      {atLimit && (
+        <p className="text-xs text-muted-foreground">
+          Máximo de {MAX_SELECTED_TICKERS} ativos.
+        </p>
+      )}
     </div>
   );
 }
