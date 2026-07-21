@@ -49,6 +49,13 @@ export function TickerSelector({
         value={selected}
         onValueChange={onSelectionChange}
         itemToStringLabel={(ticker) => ticker.symbol}
+        filter={(ticker, query) => {
+          const term = query.trim().toLowerCase();
+          return (
+            ticker.symbol.toLowerCase().includes(term) ||
+            ticker.name.toLowerCase().includes(term)
+          );
+        }}
         isItemEqualToValue={(ticker, selectedTicker) =>
           ticker.symbol === selectedTicker.symbol
         }

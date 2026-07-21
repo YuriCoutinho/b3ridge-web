@@ -2,7 +2,7 @@ import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { TickerSelector } from '@/components/TickerSelector';
 import { RangePresets } from '@/components/ticker/RangePresets';
-import { HistoryPreview } from '@/components/HistoryPreview';
+import { HistoryPreview } from '@/components/ticker/HistoryPreview';
 import { useTickerSelection } from '@/hooks/useTickerSelection';
 import { useDateRange } from '@/hooks/useDateRange';
 
