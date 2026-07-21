@@ -28,15 +28,14 @@ export function shouldRetry(failureCount: number, error: Error): boolean {
   return failureCount < MAX_RETRIES;
 }
 
-let historyToastId: number | undefined;
+let historyToastId: string | number | undefined;
 
 function notifyHistory(kind: 'success' | 'error', message: string) {
   if (historyToastId !== undefined) {
     toast.dismiss(historyToastId);
   }
-  historyToastId = (
-    kind === 'success' ? toast.success(message) : toast.error(message)
-  ) as number;
+  historyToastId =
+    kind === 'success' ? toast.success(message) : toast.error(message);
 }
 
 const queryCache = new QueryCache({
