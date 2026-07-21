@@ -1,14 +1,14 @@
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { TickerSelector } from '@/components/TickerSelector';
-import { HistoryRangeControls } from '@/components/HistoryRangeControls';
+import { PeriodPresets } from '@/components/PeriodPresets';
 import { HistoryPreview } from '@/components/HistoryPreview';
 import { useTickerSelection } from '@/hooks/useTickerSelection';
 import { useDateRange } from '@/hooks/useDateRange';
 
 function App() {
   const { selected, setSelected } = useTickerSelection();
-  const { range, activePreset, applyPreset, changeRange } = useDateRange();
+  const { range, activePreset, applyPreset } = useDateRange();
 
   return (
     <>
@@ -16,11 +16,10 @@ function App() {
       <div className="flex flex-1 flex-col md:flex-row">
         <Sidebar>
           <TickerSelector selected={selected} onSelectionChange={setSelected} />
-          <HistoryRangeControls
-            range={range}
-            activePreset={activePreset}
-            onApplyPreset={applyPreset}
-            onChangeRange={changeRange}
+          <PeriodPresets
+            value={activePreset}
+            onSelectPreset={applyPreset}
+            disabled={selected.length === 0}
           />
         </Sidebar>
 
