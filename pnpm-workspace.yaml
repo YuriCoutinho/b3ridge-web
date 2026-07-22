@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+catalog:
+  typescript: ~6.0.2
+  '@types/node': ^24.13.2
+  zod: ^4.4.3
+allowBuilds:
+  esbuild: true
