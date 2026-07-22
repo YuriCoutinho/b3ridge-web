@@ -3,6 +3,9 @@ name: Deploy
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 # Permissões mínimas para publicar no GitHub Pages via Actions
@@ -43,7 +46,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: dist
+          path: apps/web/dist
 
   deploy:
     needs: build
