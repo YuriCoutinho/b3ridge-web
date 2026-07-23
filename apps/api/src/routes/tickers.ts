@@ -1,13 +1,6 @@
 import { Router } from 'express';
-import { getTickers } from '../services/tickers.service.js';
+import { listTickers } from '../controllers/tickers.controller.js';
 
 export const tickersRouter = Router();
 
-tickersRouter.get('/tickers', async (_req, res, next) => {
-  try {
-    const tickers = await getTickers();
-    res.json(tickers);
-  } catch (error) {
-    next(error);
-  }
-});
+tickersRouter.get('/tickers', listTickers);
