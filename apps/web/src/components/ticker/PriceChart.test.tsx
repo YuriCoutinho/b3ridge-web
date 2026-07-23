@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 
 import { PriceChart } from '@/components/ticker/PriceChart';
 import { useTickerHistories } from '@/hooks/useTickerHistories';
-import type { TickerHistoryPoint } from '@/services/tickers';
+import type { Ticker, TickerHistoryPoint } from '@/services/tickers';
 
 vi.mock('@/hooks/useTickerHistories', () => ({
   useTickerHistories: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock('@/hooks/useTickerHistories', () => ({
 
 const mockedHistories = vi.mocked(useTickerHistories);
 
-const selected = [
+const selected: Ticker[] = [
   { symbol: 'PETR4', name: 'Petrobras' },
   { symbol: 'VALE3', name: 'Vale' },
 ];
