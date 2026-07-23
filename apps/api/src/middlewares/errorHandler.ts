@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { BrapiError } from '../clients/brapi.js';
+import { BrapiError } from '../clients/brapi/errors.js';
 
 export function errorHandler(
   err: unknown,

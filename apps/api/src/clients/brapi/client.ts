@@ -1,5 +1,7 @@
-import { z } from 'zod';
-import { env } from '../config/env.js';
+import { env } from '../../config/env.js';
+import { toMessage } from '../../lib/toMessage.js';
+import { brapiPageSchema, type BrapiPage } from './schemas.js';
+import { BrapiError } from './errors.js';
 
 const BRAPI_TICKERS_URL = 'https://brapi.dev/api/v2/tickers';
 const PAGE_LIMIT = 2000;
@@ -7,34 +9,11 @@ const REQUEST_TIMEOUT_MS = 8000;
 const SORT_BY = 'marketCap';
 const SORT_ORDER = 'desc';
 
-const brapiTickerSchema = z.object({
-  symbol: z.string(),
-  name: z.string(),
-  longName: z.string().nullish(),
-});
-export type BrapiTicker = z.infer<typeof brapiTickerSchema>;
-
-const brapiPageSchema = z.object({
-  results: z.array(brapiTickerSchema),
-  pagination: z.object({ totalItems: z.number() }),
-});
-export type BrapiPage = z.infer<typeof brapiPageSchema>;
-
-export class BrapiError extends Error {
-  readonly status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'BrapiError';
-    this.status = status;
-  }
-}
-
 function brapiHeaders(): Record<string, string> {
   return env.brapiToken ? { Authorization: `Bearer ${env.brapiToken}` } : {};
 }
 
-export async function fetchTickersPage(page: number): Promise<BrapiPage> {
+async function fetchTickersPage(page: number): Promise<BrapiPage> {
   const query = new URLSearchParams({
     page: String(page),
     limit: String(PAGE_LIMIT),
@@ -49,10 +28,7 @@ export async function fetchTickersPage(page: number): Promise<BrapiPage> {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch (error) {
-    throw new BrapiError(
-      `brapi request failed: ${(error as Error).message}`,
-      503,
-    );
+    throw new BrapiError(`brapi request failed: ${toMessage(error)}`, 503);
   }
 
   if (!response.ok) {
@@ -65,4 +41,17 @@ export async function fetchTickersPage(page: number): Promise<BrapiPage> {
   }
 
   return parsed.data;
+}
+
+export async function fetchAllTickerPages(): Promise<BrapiPage[]> {
+  const firstPage = await fetchTickersPage(1);
+  const totalPages = Math.ceil(firstPage.pagination.totalItems / PAGE_LIMIT);
+
+  const remainingPages: Promise<BrapiPage>[] = [];
+  for (let page = 2; page <= totalPages; page += 1) {
+    remainingPages.push(fetchTickersPage(page));
+  }
+
+  const rest = await Promise.all(remainingPages);
+  return [firstPage, ...rest];
 }

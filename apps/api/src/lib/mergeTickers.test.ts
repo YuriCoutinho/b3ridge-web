@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { BrapiPage, BrapiTicker } from '../clients/brapi.js';
+import type { BrapiPage, BrapiTicker } from '../clients/brapi/schemas.js';
 import { mergeTickers } from './mergeTickers.js';
 
 function ticker(
