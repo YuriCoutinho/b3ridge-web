@@ -41,7 +41,7 @@ describe('fetchTickers', () => {
 });
 
 describe('fetchTickerHistory', () => {
-  it('returns the historicalDataPrice points', async () => {
+  it('returns the history points from the internal API', async () => {
     const point = {
       date: 1,
       open: 1,
@@ -51,20 +51,20 @@ describe('fetchTickerHistory', () => {
       volume: 100,
       adjustedClose: 1.5,
     };
-    stubFetch({ results: [{ data: { historicalDataPrice: [point] } }] });
+    stubFetch([point]);
 
     const result = await fetchTickerHistory('PETR4', range);
 
     expect(result).toEqual([point]);
   });
 
-  it('sends symbols, startDate and endDate in the query', async () => {
-    const fetchMock = stubFetch({ results: [] });
+  it('requests the internal /api/tickers/:symbol/history endpoint with startDate and endDate', async () => {
+    const fetchMock = stubFetch([]);
 
     await fetchTickerHistory('PETR4', range);
 
     const [url] = fetchMock.mock.calls[0];
-    expect(url).toContain('symbols=PETR4');
+    expect(url).toContain('/api/tickers/PETR4/history');
     expect(url).toContain('startDate=2026-07-12');
     expect(url).toContain('endDate=2026-07-19');
   });
@@ -78,9 +78,7 @@ describe('fetchTickerHistory', () => {
   });
 
   it('throws ApiError when the response does not match the schema', async () => {
-    stubFetch({
-      results: [{ data: { historicalDataPrice: [{ date: 'nope' }] } }],
-    });
+    stubFetch([{ date: 'nope' }]);
 
     await expect(fetchTickerHistory('PETR4', range)).rejects.toMatchObject({
       name: 'ApiError',
@@ -88,8 +86,8 @@ describe('fetchTickerHistory', () => {
     });
   });
 
-  it('returns an empty list when results is empty', async () => {
-    stubFetch({ results: [] });
+  it('returns an empty list when the API returns no points', async () => {
+    stubFetch([]);
 
     const result = await fetchTickerHistory('XXXX', range);
 

@@ -1,5 +1,5 @@
 import type { Ticker } from '@b3ridge/contracts';
-import { fetchAllTickerPages } from '../clients/brapi/client.js';
+import { fetchAllTickerPages } from '../clients/brapi/tickers.js';
 import { getJson, setJson } from '../cache/redis.js';
 import { mergeTickers } from '../lib/mergeTickers.js';
 

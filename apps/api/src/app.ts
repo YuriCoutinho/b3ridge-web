@@ -3,7 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
-import { tickersRouter } from './routes/tickers.js';
+import { apiRouter } from './routes/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 export function createApp() {
@@ -24,7 +24,7 @@ export function createApp() {
     res.json({ status: 'ok', service: 'api' });
   });
 
-  app.use('/api', tickersRouter);
+  app.use('/api', apiRouter);
 
   app.use(errorHandler);
 
