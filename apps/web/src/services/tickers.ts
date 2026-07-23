@@ -1,18 +1,10 @@
 import { z } from 'zod';
+import { tickersResponseSchema, type Ticker } from '@b3ridge/contracts';
 import { request } from './client';
 import { env } from '../config/env';
 import type { DateRange } from '../lib/dateRange';
 
-const tickerSchema = z.object({
-  symbol: z.string(),
-  name: z.string(),
-});
-
-export type Ticker = z.infer<typeof tickerSchema>;
-
-const tickersResponseSchema = z.object({
-  results: z.array(tickerSchema),
-});
+export type { Ticker };
 
 const tickerHistoryPointSchema = z.object({
   date: z.number(),
@@ -37,11 +29,7 @@ const tickerHistoryResponseSchema = z.object({
 });
 
 export async function fetchTickers(): Promise<Ticker[]> {
-  const { results } = await request(
-    '/tickers?limit=2000&sortBy=marketCap',
-    tickersResponseSchema,
-  );
-  return results;
+  return request(`${env.internalApiUrl}/api/tickers`, tickersResponseSchema);
 }
 
 export async function fetchTickerHistory(
@@ -54,7 +42,7 @@ export async function fetchTickerHistory(
 
   const query = new URLSearchParams({ symbols: symbol, startDate, endDate });
   const { results } = await request(
-    `/stocks/historical?${query}`,
+    `${env.apiUrl}/stocks/historical?${query}`,
     tickerHistoryResponseSchema,
     headers,
   );

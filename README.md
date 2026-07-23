@@ -26,7 +26,7 @@ O frontend nunca busca preços direto na fonte externa. Ele sempre pergunta ao b
 Frontend -> Backend -> Fonte de dados externa (B3)
 ```
 
-Enquanto o backend não existe, a camada de API (`apiClient`) bate provisoriamente na fonte externa de forma isolada, apenas para destravar o desenvolvimento do frontend.
+A lista de ativos já passa pelo backend interno (`GET /api/tickers`), que busca na fonte externa, deduplica, projeta o payload mínimo e cacheia no Redis. O histórico de preços ainda bate provisoriamente na fonte externa direto do frontend e será migrado em seguida.
 
 ## Stack
 
@@ -41,29 +41,50 @@ UI (shadcn/ui e Tailwind) e dados (TanStack Query e Recharts) chegam nas entrega
 
 ## Começando
 
-Requisitos: Node 24 (fixado no `.nvmrc`) e pnpm via corepack.
+Requisitos: Node 24 (fixado no `.nvmrc`), pnpm via corepack e Docker (para o Redis local).
 
 ```bash
 nvm use
 corepack enable
 pnpm install
-cp .env.example .env
-pnpm dev
+docker compose up -d redis   # Redis para o cache do backend
+pnpm dev                     # sobe web e api em paralelo
 ```
+
+## Variáveis de ambiente
+
+Configure cada app com um `.env` local (a partir do seu `.env.example`).
+
+`apps/api/.env`:
+
+| Variável       | Obrigatória | Descrição                                                                                  |
+| -------------- | ----------- | ------------------------------------------------------------------------------------------ |
+| `PORT`         | não         | Porta do backend (padrão `3333`).                                                          |
+| `CORS_ORIGINS` | sim         | Allowlist de origens separada por vírgula (nunca `*`), ex.: `http://localhost:5173`.       |
+| `REDIS_URL`    | sim         | Conexão do Redis, ex.: `redis://localhost:6379`.                                           |
+| `BRAPI_TOKEN`  | não         | Token da brapi enviado como `Bearer` quando presente (a rota de tickers funciona sem ele). |
+
+`apps/web/.env`:
+
+| Variável                | Obrigatória | Descrição                                                                     |
+| ----------------------- | ----------- | ----------------------------------------------------------------------------- |
+| `VITE_INTERNAL_API_URL` | não         | Base do backend interno para `/api/tickers` (padrão `http://localhost:3333`). |
+| `VITE_API_BASE_URL`     | sim         | Base da fonte externa, usada pelo histórico (provisório).                     |
+| `VITE_API_TOKEN`        | sim         | Token da fonte externa, usado pelo histórico (provisório).                    |
 
 ## Scripts
 
-| Script | Descrição |
-| --- | --- |
-| `pnpm dev` | Servidor de desenvolvimento. |
-| `pnpm build` | Typecheck e build de produção. |
-| `pnpm preview` | Serve o build de produção. |
-| `pnpm typecheck` | Checagem de tipos. |
-| `pnpm test` | Testes em modo watch. |
-| `pnpm test:run` | Testes uma vez (CI). |
-| `pnpm test:cov` | Testes com cobertura. |
-| `pnpm lint` | Lint com Oxlint. |
-| `pnpm format` | Formata com Prettier. |
+| Script           | Descrição                      |
+| ---------------- | ------------------------------ |
+| `pnpm dev`       | Servidor de desenvolvimento.   |
+| `pnpm build`     | Typecheck e build de produção. |
+| `pnpm preview`   | Serve o build de produção.     |
+| `pnpm typecheck` | Checagem de tipos.             |
+| `pnpm test`      | Testes em modo watch.          |
+| `pnpm test:run`  | Testes uma vez (CI).           |
+| `pnpm test:cov`  | Testes com cobertura.          |
+| `pnpm lint`      | Lint com Oxlint.               |
+| `pnpm format`    | Formata com Prettier.          |
 
 ## Qualidade e CI/CD
 

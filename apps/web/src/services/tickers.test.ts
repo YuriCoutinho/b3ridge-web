@@ -16,20 +16,27 @@ afterEach(() => {
 });
 
 describe('fetchTickers', () => {
-  it('returns only symbol and name, discarding the rest of the payload', async () => {
-    stubFetch({
-      results: [
-        { symbol: 'PETR4', name: 'Petrobras', quote: {}, sector: 'x' },
-        { symbol: 'VALE3', name: 'Vale', quote: {}, sector: 'y' },
-      ],
-    });
+  it('returns the ticker list from the internal API', async () => {
+    stubFetch([
+      { symbol: 'PETR4', name: 'Petrobras' },
+      { symbol: 'HGLG11', name: 'CSHG Logística' },
+    ]);
 
     const result = await fetchTickers();
 
     expect(result).toEqual([
       { symbol: 'PETR4', name: 'Petrobras' },
-      { symbol: 'VALE3', name: 'Vale' },
+      { symbol: 'HGLG11', name: 'CSHG Logística' },
     ]);
+  });
+
+  it('requests the internal /api/tickers endpoint', async () => {
+    const fetchMock = stubFetch([]);
+
+    await fetchTickers();
+
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain('/api/tickers');
   });
 });
 
