@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { fetchTickers, fetchTickerHistory } from '@/services/tickers';
+import { fetchTickers, fetchTickerHistories } from '@/services/tickers';
 
 const range = { startDate: '2026-07-12', endDate: '2026-07-19' };
 
@@ -40,57 +40,55 @@ describe('fetchTickers', () => {
   });
 });
 
-describe('fetchTickerHistory', () => {
-  it('returns the history points from the internal API', async () => {
-    const point = {
-      date: 1,
-      open: 1,
-      high: 2,
-      low: 0,
-      close: 1.5,
-      volume: 100,
-      adjustedClose: 1.5,
-    };
-    stubFetch([point]);
+describe('fetchTickerHistories', () => {
+  const point = {
+    date: 1,
+    open: 1,
+    high: 2,
+    low: 0,
+    close: 1.5,
+    volume: 100,
+    adjustedClose: 1.5,
+  };
 
-    const result = await fetchTickerHistory('PETR4', range);
+  it('returns the per-symbol results from the internal API', async () => {
+    const body = [
+      { symbol: 'PETR4', status: 'ok', history: [point] },
+      { symbol: 'XXXXX', status: 'error', reason: 'not_found' },
+    ];
+    stubFetch(body);
 
-    expect(result).toEqual([point]);
+    const result = await fetchTickerHistories(['PETR4', 'XXXXX'], range);
+
+    expect(result).toEqual(body);
   });
 
-  it('requests the internal /api/tickers/:symbol/history endpoint with startDate and endDate', async () => {
+  it('requests the internal /api/tickers/history endpoint with symbols and date range', async () => {
     const fetchMock = stubFetch([]);
 
-    await fetchTickerHistory('PETR4', range);
+    await fetchTickerHistories(['PETR4', 'VALE3'], range);
 
     const [url] = fetchMock.mock.calls[0];
-    expect(url).toContain('/api/tickers/PETR4/history');
+    expect(url).toContain('/api/tickers/history');
+    expect(url).toContain('symbols=PETR4%2CVALE3');
     expect(url).toContain('startDate=2026-07-12');
     expect(url).toContain('endDate=2026-07-19');
   });
 
   it('throws ApiError carrying the status when the response is not ok', async () => {
-    stubFetch({}, false, 404);
+    stubFetch({}, false, 400);
 
-    await expect(fetchTickerHistory('XXXX', range)).rejects.toMatchObject({
-      status: 404,
+    await expect(fetchTickerHistories(['PETR4'], range)).rejects.toMatchObject({
+      status: 400,
     });
   });
 
   it('throws ApiError when the response does not match the schema', async () => {
-    stubFetch([{ date: 'nope' }]);
+    stubFetch([{ symbol: 'PETR4', status: 'ok' }]);
 
-    await expect(fetchTickerHistory('PETR4', range)).rejects.toMatchObject({
+    await expect(fetchTickerHistories(['PETR4'], range)).rejects.toMatchObject({
       name: 'ApiError',
       status: 502,
     });
-  });
-
-  it('returns an empty list when the API returns no points', async () => {
-    stubFetch([]);
-
-    const result = await fetchTickerHistory('XXXX', range);
-
-    expect(result).toEqual([]);
   });
 });

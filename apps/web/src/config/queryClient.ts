@@ -28,30 +28,18 @@ export function shouldRetry(failureCount: number, error: Error): boolean {
   return failureCount < MAX_RETRIES;
 }
 
-let historyToastId: string | number | undefined;
-
-function notifyHistory(kind: 'success' | 'error', message: string) {
-  if (historyToastId !== undefined) {
-    toast.dismiss(historyToastId);
-  }
-  historyToastId =
-    kind === 'success' ? toast.success(message) : toast.error(message);
-}
-
 const queryCache = new QueryCache({
   onError: (_error, query) => {
     const message = query.meta?.toast?.error;
-    if (!message) {
-      return;
+    if (message) {
+      toast.error(message);
     }
-    notifyHistory('error', message);
   },
   onSuccess: (_data, query) => {
     const message = query.meta?.toast?.success;
-    if (!message) {
-      return;
+    if (message) {
+      toast.success(message);
     }
-    notifyHistory('success', message);
   },
 });
 

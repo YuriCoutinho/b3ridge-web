@@ -23,9 +23,10 @@ export function EmptyTickerSelection() {
             <LockIcon className="size-3" />
           </span>
         </EmptyMedia>
-        <EmptyTitle>Nenhum ativo selecionado</EmptyTitle>
+        <EmptyTitle>Nenhum ativo consultado</EmptyTitle>
         <EmptyDescription>
-          Selecione um ou mais ativos para visualizar o gráfico de preços.
+          Selecione os ativos e clique em Consultar para visualizar o gráfico de
+          preços.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
