@@ -1,12 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
+import { tickerHistoryQuerySchema } from '@b3ridge/contracts';
 import { z } from 'zod';
 import { getTickerHistory } from '../services/history.service.js';
 
-const paramsSchema = z.object({ symbol: z.string().min(1) });
-const querySchema = z.object({
-  startDate: z.iso.date(),
-  endDate: z.iso.date(),
-});
+// B3 tickers: 5-7 uppercase alphanumeric chars (e.g. PETR4, BPAC11, KLBN11F)
+const paramsSchema = z.object({ symbol: z.string().regex(/^[A-Z0-9]{5,7}$/) });
 
 export async function getHistory(
   req: Request,
@@ -14,7 +12,7 @@ export async function getHistory(
   next: NextFunction,
 ): Promise<void> {
   const params = paramsSchema.safeParse(req.params);
-  const query = querySchema.safeParse(req.query);
+  const query = tickerHistoryQuerySchema.safeParse(req.query);
 
   if (!params.success || !query.success) {
     res.status(400).json({ error: 'Invalid request parameters' });

@@ -1,7 +1,6 @@
-export interface DateRange {
-  startDate: string;
-  endDate: string;
-}
+import type { TickerHistoryQuery } from '@b3ridge/contracts';
+
+export type DateRange = TickerHistoryQuery;
 
 function toIso(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -12,19 +11,22 @@ export function splitDateRange(
   maxDays: number,
 ): DateRange[] {
   const end = new Date(`${endDate}T00:00:00Z`);
-  let chunkStart = new Date(`${startDate}T00:00:00Z`);
+  let segmentStart = new Date(`${startDate}T00:00:00Z`);
 
-  const chunks: DateRange[] = [];
-  while (chunkStart <= end) {
-    const chunkEnd = new Date(chunkStart);
-    chunkEnd.setUTCDate(chunkEnd.getUTCDate() + maxDays);
-    const boundedEnd = chunkEnd < end ? chunkEnd : end;
+  const dateRangeSegments: DateRange[] = [];
+  while (segmentStart <= end) {
+    const segmentEnd = new Date(segmentStart);
+    segmentEnd.setUTCDate(segmentEnd.getUTCDate() + maxDays);
+    const boundedEnd = segmentEnd < end ? segmentEnd : end;
 
-    chunks.push({ startDate: toIso(chunkStart), endDate: toIso(boundedEnd) });
+    dateRangeSegments.push({
+      startDate: toIso(segmentStart),
+      endDate: toIso(boundedEnd),
+    });
 
-    chunkStart = new Date(boundedEnd);
-    chunkStart.setUTCDate(chunkStart.getUTCDate() + 1);
+    segmentStart = new Date(boundedEnd);
+    segmentStart.setUTCDate(segmentStart.getUTCDate() + 1);
   }
 
-  return chunks;
+  return dateRangeSegments;
 }

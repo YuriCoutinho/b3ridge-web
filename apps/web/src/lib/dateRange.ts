@@ -7,15 +7,17 @@ import {
   subMonths,
   subYears,
 } from 'date-fns';
+import {
+  dataLagDays,
+  maxEndDateIso,
+  type TickerHistoryQuery,
+} from '@b3ridge/contracts';
 
-export interface DateRange {
-  startDate: string;
-  endDate: string;
-}
+export type DateRange = TickerHistoryQuery;
+
+export { dataLagDays, maxEndDateIso };
 
 const isoFormat = 'yyyy-MM-dd';
-
-export const dataLagDays = 3;
 
 export type RangePreset = '5d' | '1m' | '3m' | '6m' | '1y' | 'ytd';
 
@@ -38,7 +40,7 @@ const startResolvers: Record<RangePreset, (endDate: Date) => Date> = {
 };
 
 function maxEndDate(): Date {
-  return subDays(new Date(), dataLagDays);
+  return isoToDate(maxEndDateIso())!;
 }
 
 export function resolveRange(preset: RangePreset): DateRange {
@@ -57,10 +59,6 @@ export function matchPreset(range: DateRange): RangePreset | null {
   });
 
   return preset?.id ?? null;
-}
-
-export function maxEndDateIso(): string {
-  return dateToIso(maxEndDate());
 }
 
 export function isoToDate(iso: string): Date | undefined {
