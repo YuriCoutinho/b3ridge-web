@@ -2,9 +2,10 @@ import type {
   TickerHistoryPoint,
   TickerHistoryResult,
 } from '@b3ridge/contracts';
+
+import { getJson, setJson } from '../cache/redis.js';
 import { BrapiError } from '../clients/brapi/errors.js';
 import { fetchTickerHistory } from '../clients/brapi/history/client.js';
-import { getJson, setJson } from '../cache/redis.js';
 import type { DateRange } from '../lib/dateRange.js';
 
 const CACHE_TTL_SECONDS = 60 * 60 * 6;

@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { mapTickers } from './mapper.js';
 import type { BrapiPage, BrapiTicker } from './schema.js';
 

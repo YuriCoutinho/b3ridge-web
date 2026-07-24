@@ -1,5 +1,6 @@
-import type { NextFunction, Request, Response } from 'express';
 import { tickerHistoryBatchQuerySchema } from '@b3ridge/contracts';
+import type { NextFunction, Request, Response } from 'express';
+
 import { getTickerHistories } from '../services/history.service.js';
 
 export async function getHistory(

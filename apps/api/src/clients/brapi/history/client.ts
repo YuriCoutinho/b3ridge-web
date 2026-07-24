@@ -1,4 +1,5 @@
 import type { TickerHistoryPoint } from '@b3ridge/contracts';
+
 import { splitDateRange, type DateRange } from '../../../lib/dateRange.js';
 import { brapiGet } from '../httpClient.js';
 import { dedupeAndSortByDate } from './normalize.js';

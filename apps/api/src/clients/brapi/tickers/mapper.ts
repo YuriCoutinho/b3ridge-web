@@ -1,4 +1,5 @@
 import type { Ticker } from '@b3ridge/contracts';
+
 import type { BrapiPage, BrapiTicker } from './schema.js';
 
 // brapi repeats the symbol in name for most funds/BDRs; the readable name lives in longName

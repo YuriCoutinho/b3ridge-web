@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis';
+
 import { env } from '../config/env.js';
 import { toMessage } from '../lib/toMessage.js';
 

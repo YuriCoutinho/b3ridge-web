@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { TickerHistoryPoint } from '@b3ridge/contracts';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { getJson, setJson } from '../cache/redis.js';
 import { BrapiError } from '../clients/brapi/errors.js';
 import { fetchTickerHistory } from '../clients/brapi/history/client.js';
-import { getJson, setJson } from '../cache/redis.js';
 import { getTickerHistories } from './history.service.js';
 
 vi.mock('../clients/brapi/history/client.js', () => ({

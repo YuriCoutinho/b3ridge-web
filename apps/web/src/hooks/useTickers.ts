@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { fetchTickers } from '@/services/tickers';
 
 export function useTickers() {

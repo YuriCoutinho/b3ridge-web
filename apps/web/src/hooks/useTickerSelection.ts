@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import { maxBatchSymbols } from '@b3ridge/contracts';
+import { useState } from 'react';
+
 import type { Ticker } from '@/services/tickers';
 
 export function useTickerSelection() {

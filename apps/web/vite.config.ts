@@ -1,7 +1,7 @@
 import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/b3ridge-web/' : '/',

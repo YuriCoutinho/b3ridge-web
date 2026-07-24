@@ -1,4 +1,5 @@
 import type { Ticker } from '@b3ridge/contracts';
+
 import { brapiGet } from '../httpClient.js';
 import { mapTickers } from './mapper.js';
 import { brapiPageSchema, type BrapiPage } from './schema.js';

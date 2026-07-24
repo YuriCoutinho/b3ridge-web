@@ -1,11 +1,11 @@
-import { z } from 'zod';
 import {
   dataLagDays,
   maxBatchSymbols,
-  tickerSchema,
   tickerHistoryPointSchema,
   tickerHistoryResultSchema,
+  tickerSchema,
 } from '@b3ridge/contracts';
+import { z } from 'zod';
 
 type JsonSchema = Record<string, unknown>;
 

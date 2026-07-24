@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { dedupeAndSortByDate } from './normalize.js';
 import type { TickerHistoryPoint } from '@b3ridge/contracts';
+import { describe, expect, it } from 'vitest';
+
+import { dedupeAndSortByDate } from './normalize.js';
 
 function point(overrides: Partial<TickerHistoryPoint> & { date: number }) {
   return {
