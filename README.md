@@ -1,14 +1,13 @@
 # B3ridge
 
 [![CI](https://github.com/yuricoutinho/b3ridge-web/actions/workflows/ci.yml/badge.svg)](https://github.com/yuricoutinho/b3ridge-web/actions/workflows/ci.yml)
-[![Live](https://img.shields.io/badge/live-github%20pages-2ea44f)](https://yuricoutinho.github.io/b3ridge-web/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 Ferramenta para consultar o histórico de preços de fechamento de ativos da B3 (bolsa brasileira) e visualizar sua evolução em um gráfico de linha comparativo.
 
 O usuário escolhe um ou mais ativos, define um período e recebe um gráfico com a evolução de cada um. Como ativos têm preços muito diferentes entre si, as séries são normalizadas em variação percentual desde o início do período, permitindo comparar tudo na mesma escala.
 
-Live (frontend): https://yuricoutinho.github.io/b3ridge-web/
+O projeto roda localmente (veja [Começando](#começando)); não há ambiente publicado.
 
 Este é um monorepo com o frontend, o backend interno e os contratos compartilhados entre eles.
 
@@ -24,7 +23,7 @@ Este é um monorepo com o frontend, o backend interno e os contratos compartilha
 
 | Documento                             | Onde                                                                         |
 | ------------------------------------- | ---------------------------------------------------------------------------- |
-| Referência da API (endpoints, shapes) | Swagger UI em `/api/docs` com a API no ar (spec em `/api/docs/openapi.json`) |
+| Referência da API (endpoints, shapes) | Swagger UI em `/api/docs` com a API rodando localmente (spec em `/api/docs/openapi.json`) |
 | Backend: decisões e diagramas         | [`docs/architecture.md`](./docs/architecture.md)                             |
 | Frontend: decisões e diagramas        | [`docs/frontend.md`](./docs/frontend.md)                                     |
 
