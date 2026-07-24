@@ -1,8 +1,7 @@
 import type { TickerHistoryPoint } from '@b3ridge/contracts';
-import type { BrapiHistoryPoint } from './schema.js';
 
 export function dedupeAndSortByDate(
-  points: BrapiHistoryPoint[],
+  points: TickerHistoryPoint[],
 ): TickerHistoryPoint[] {
   const byDate = new Map<number, TickerHistoryPoint>();
   for (const point of points) {

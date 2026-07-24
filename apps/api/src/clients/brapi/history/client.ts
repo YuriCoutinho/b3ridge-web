@@ -2,7 +2,7 @@ import type { TickerHistoryPoint } from '@b3ridge/contracts';
 import { splitDateRange, type DateRange } from '../../../lib/dateRange.js';
 import { brapiGet } from '../httpClient.js';
 import { dedupeAndSortByDate } from './normalize.js';
-import { brapiHistorySchema, type BrapiHistoryPoint } from './schema.js';
+import { brapiHistorySchema } from './schema.js';
 
 const INTERVAL = '1d';
 const MAX_RANGE_DAYS = 90; // brapi free-plan cap on custom startDate/endDate windows
@@ -10,7 +10,7 @@ const MAX_RANGE_DAYS = 90; // brapi free-plan cap on custom startDate/endDate wi
 async function fetchHistorySegment(
   symbol: string,
   { startDate, endDate }: DateRange,
-): Promise<BrapiHistoryPoint[]> {
+): Promise<TickerHistoryPoint[]> {
   const page = await brapiGet(
     `/quote/${symbol}`,
     { interval: INTERVAL, startDate, endDate },

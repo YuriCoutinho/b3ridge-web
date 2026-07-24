@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { dedupeAndSortByDate } from './normalize.js';
-import type { BrapiHistoryPoint } from './schema.js';
+import type { TickerHistoryPoint } from '@b3ridge/contracts';
 
-function point(overrides: Partial<BrapiHistoryPoint> & { date: number }) {
+function point(overrides: Partial<TickerHistoryPoint> & { date: number }) {
   return {
     open: 1,
     high: 1,
