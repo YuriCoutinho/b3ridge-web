@@ -1,5 +1,9 @@
 # B3ridge
 
+[![CI](https://github.com/yuricoutinho/b3ridge-web/actions/workflows/ci.yml/badge.svg)](https://github.com/yuricoutinho/b3ridge-web/actions/workflows/ci.yml)
+[![Live](https://img.shields.io/badge/live-github%20pages-2ea44f)](https://yuricoutinho.github.io/b3ridge-web/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+
 Ferramenta para consultar o histórico de preços de fechamento de ativos da B3 (bolsa brasileira) e visualizar sua evolução em um gráfico de linha comparativo.
 
 O usuário escolhe um ou mais ativos, define um período e recebe um gráfico com a evolução de cada um. Como ativos têm preços muito diferentes entre si, as séries são normalizadas em variação percentual desde o início do período, permitindo comparar tudo na mesma escala.
@@ -18,13 +22,13 @@ Este é um monorepo com o frontend, o backend interno e os contratos compartilha
 
 ## Documentação
 
-| Documento                             | Onde                                                                                              |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Referência da API (endpoints, shapes) | Swagger UI em `/api/docs` com a API no ar (spec em `/api/docs/openapi.json`)                      |
-| Backend: decisões e diagramas         | [`docs/architecture.md`](./docs/architecture.md)                                                  |
-| Frontend: visão geral                 | Seções [Funcionalidades](#funcionalidades) e [Arquitetura de dados](#arquitetura-de-dados) abaixo |
+| Documento                             | Onde                                                                         |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| Referência da API (endpoints, shapes) | Swagger UI em `/api/docs` com a API no ar (spec em `/api/docs/openapi.json`) |
+| Backend: decisões e diagramas         | [`docs/architecture.md`](./docs/architecture.md)                             |
+| Frontend: decisões e diagramas        | [`docs/frontend.md`](./docs/frontend.md)                                     |
 
-O Swagger é gerado a partir dos schemas Zod em `packages/contracts`, então a referência de endpoints nunca diverge do código. O documento de arquitetura cobre o "porquê" e os fluxos transversais que uma spec não expressa, sem repetir a referência de endpoints.
+O Swagger é gerado a partir dos schemas Zod em `packages/contracts`, então a referência de endpoints nunca diverge do código. Os documentos de arquitetura cobrem o "porquê" e os fluxos que uma spec não expressa, sem repetir a referência de endpoints.
 
 ## Funcionalidades
 
@@ -40,13 +44,14 @@ O Swagger é gerado a partir dos schemas Zod em `packages/contracts`, então a r
 
 O frontend nunca busca preços direto na fonte externa. Ele sempre pergunta ao backend interno, que decide entre buscar novo dado ou reaproveitar o que já está em cache. Isso protege o limite de requisições da brapi e acelera consultas repetidas.
 
-```
-apps/web  ->  apps/api  ->  brapi (fonte de dados da B3)
-                  |
-                Redis (cache)
+```mermaid
+flowchart LR
+  web["apps/web (SPA)"] -->|HTTP JSON| api["apps/api (BFF)"]
+  api -->|cache| redis[("Redis")]
+  api -->|HTTPS| brapi["brapi (dados da B3)"]
 ```
 
-A lista de ativos (`GET /api/tickers`) e o histórico de preços em lote (`GET /api/tickers/history`) passam pelo backend, que busca na brapi, projeta o payload mínimo e cacheia no Redis. Como o plano usado na brapi limita consultas por data a janelas de 90 dias, o backend quebra períodos maiores em múltiplas requisições e mescla o resultado antes de cachear. Detalhes e diagramas em [`docs/architecture.md`](./docs/architecture.md).
+A lista de ativos (`GET /api/tickers`) e o histórico de preços em lote (`GET /api/tickers/history`) passam pelo backend, que busca na brapi, projeta o payload mínimo e cacheia no Redis. Como o plano usado na brapi limita consultas por data a janelas de 90 dias, o backend quebra períodos maiores em múltiplas requisições e mescla o resultado antes de cachear. Detalhes e diagramas em [`docs/architecture.md`](./docs/architecture.md) (backend) e [`docs/frontend.md`](./docs/frontend.md) (frontend).
 
 ## Stack
 
