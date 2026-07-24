@@ -8,18 +8,13 @@ import {
   toPercentSeries,
   type ChartRow,
   type PercentPoint,
+  type TickerSummary,
 } from '@/lib/series';
 import type { HistoryErrorReason, Ticker } from '@/services/tickers';
 
 export interface ChartSeries {
   symbol: string;
   points: PercentPoint[];
-  colorVar: string;
-}
-
-export interface ChartSummary {
-  symbol: string;
-  changePct: number;
   colorVar: string;
 }
 
@@ -32,7 +27,7 @@ export type ChartData =
       rows: ChartRow[];
       config: ChartConfig;
       series: ChartSeries[];
-      summaries: ChartSummary[];
+      summaries: TickerSummary[];
       failureLines: string[];
     };
 
