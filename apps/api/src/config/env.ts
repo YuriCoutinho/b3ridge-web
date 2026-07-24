@@ -10,6 +10,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3333),
   CORS_ORIGINS: z.string().min(1),
   REDIS_URL: z.string().min(1),
+  BRAPI_URL: z.string().url(),
   BRAPI_TOKEN: z.string().optional(),
 });
 
@@ -25,5 +26,6 @@ export const env = {
     .map((origin) => origin.trim())
     .filter(Boolean),
   redisUrl: parsed.data.REDIS_URL,
+  brapiUrl: parsed.data.BRAPI_URL,
   brapiToken: parsed.data.BRAPI_TOKEN,
 };

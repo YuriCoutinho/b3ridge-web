@@ -26,7 +26,7 @@ O frontend nunca busca preços direto na fonte externa. Ele sempre pergunta ao b
 Frontend -> Backend -> Fonte de dados externa (B3)
 ```
 
-A lista de ativos já passa pelo backend interno (`GET /api/tickers`), que busca na fonte externa, deduplica, projeta o payload mínimo e cacheia no Redis. O histórico de preços ainda bate provisoriamente na fonte externa direto do frontend e será migrado em seguida.
+A lista de ativos (`GET /api/tickers`) e o histórico de preços (`GET /api/tickers/:symbol/history`) passam pelo backend interno, que busca na fonte externa, projeta o payload mínimo e cacheia no Redis. Como o plano usado na fonte externa limita consultas por data a janelas de 90 dias, o backend quebra períodos maiores em múltiplas requisições e mescla o resultado antes de cachear.
 
 ## Stack
 
@@ -66,11 +66,9 @@ Configure cada app com um `.env` local (a partir do seu `.env.example`).
 
 `apps/web/.env`:
 
-| Variável                | Obrigatória | Descrição                                                                     |
-| ----------------------- | ----------- | ----------------------------------------------------------------------------- |
-| `VITE_INTERNAL_API_URL` | não         | Base do backend interno para `/api/tickers` (padrão `http://localhost:3333`). |
-| `VITE_API_BASE_URL`     | sim         | Base da fonte externa, usada pelo histórico (provisório).                     |
-| `VITE_API_TOKEN`        | sim         | Token da fonte externa, usado pelo histórico (provisório).                    |
+| Variável                | Obrigatória | Descrição                                            |
+| ----------------------- | ----------- | ----------------------------------------------------- |
+| `VITE_INTERNAL_API_URL` | sim         | Base do backend interno, ex.: `http://localhost:3333`. |
 
 ## Scripts
 

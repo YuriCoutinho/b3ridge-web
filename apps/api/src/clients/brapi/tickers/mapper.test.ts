@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { BrapiPage, BrapiTicker } from '../clients/brapi/schemas.js';
-import { mergeTickers } from './mergeTickers.js';
+import { mapTickers } from './mapper.js';
+import type { BrapiPage, BrapiTicker } from './schema.js';
 
 function ticker(
   overrides: Partial<BrapiTicker> & { symbol: string },
@@ -16,7 +16,7 @@ function page(results: BrapiTicker[]): BrapiPage {
   return { results, pagination: { totalItems: results.length } };
 }
 
-describe('mergeTickers', () => {
+describe('mapTickers', () => {
   it('concatenates pages in order and projects to symbol and name', () => {
     const pages = [
       page([
@@ -29,7 +29,7 @@ describe('mergeTickers', () => {
       ]),
     ];
 
-    expect(mergeTickers(pages)).toEqual([
+    expect(mapTickers(pages)).toEqual([
       { symbol: 'PETR4', name: 'Petrobras' },
       { symbol: 'VALE3', name: 'Vale' },
       { symbol: 'HGLG11', name: 'CSHG Log' },
@@ -48,7 +48,7 @@ describe('mergeTickers', () => {
       ]),
     ];
 
-    expect(mergeTickers(pages)[0].name).toBe('Kilima Volkano FII');
+    expect(mapTickers(pages)[0].name).toBe('Kilima Volkano FII');
   });
 
   it('falls back to the symbol when neither name nor longName is usable', () => {
@@ -56,6 +56,6 @@ describe('mergeTickers', () => {
       page([ticker({ symbol: 'XPTO3', name: 'XPTO3', longName: null })]),
     ];
 
-    expect(mergeTickers(pages)[0].name).toBe('XPTO3');
+    expect(mapTickers(pages)[0].name).toBe('XPTO3');
   });
 });

@@ -9,7 +9,9 @@ export function errorHandler(
 ): void {
   if (err instanceof BrapiError) {
     console.error(`brapi error (${err.status}): ${err.message}`);
-    res.status(err.status).json({ error: 'Upstream data source error' });
+    const error =
+      err.status === 404 ? 'Ticker not found' : 'Upstream data source error';
+    res.status(err.status).json({ error });
     return;
   }
 
