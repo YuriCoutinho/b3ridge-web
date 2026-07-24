@@ -1,3 +1,4 @@
+import { maxEndDateIso, minStartDateIso } from '@b3ridge/contracts';
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,8 +9,17 @@ vi.mock('../services/history.service.js', () => ({
   getTickerHistories: vi.fn(),
 }));
 
+function isoDaysBefore(iso: string, days: number): string {
+  const date = new Date(`${iso}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+
 const serviceMock = vi.mocked(getTickerHistories);
-const validRange = { startDate: '2024-01-01', endDate: '2024-02-01' };
+const validRange = {
+  startDate: isoDaysBefore(maxEndDateIso(), 30),
+  endDate: maxEndDateIso(),
+};
 
 function mockRes(): Response {
   const res = {} as Response;
@@ -57,6 +67,23 @@ describe('getHistory', () => {
 
     await getHistory(
       requestWith({ symbols: 'petr4', ...validRange }),
+      res,
+      vi.fn(),
+    );
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(serviceMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a start beyond the max lookback with 400', async () => {
+    const res = mockRes();
+
+    await getHistory(
+      requestWith({
+        symbols: 'PETR4',
+        startDate: isoDaysBefore(minStartDateIso(), 1),
+        endDate: maxEndDateIso(),
+      }),
       res,
       vi.fn(),
     );

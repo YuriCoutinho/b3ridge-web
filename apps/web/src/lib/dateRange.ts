@@ -1,6 +1,8 @@
 import {
   dataLagDays,
   maxEndDateIso,
+  maxLookbackYears,
+  minStartDateIso,
   type TickerHistoryQuery,
 } from '@b3ridge/contracts';
 import {
@@ -15,7 +17,7 @@ import {
 
 export type DateRange = TickerHistoryQuery;
 
-export { dataLagDays, maxEndDateIso };
+export { dataLagDays, maxEndDateIso, maxLookbackYears, minStartDateIso };
 
 const isoFormat = 'yyyy-MM-dd';
 
@@ -72,6 +74,14 @@ export function dateToIso(date: Date): string {
   return format(date, isoFormat);
 }
 
+export function maskDateInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  const day = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const year = digits.slice(4, 8);
+  return [day, month, year].filter(Boolean).join('/');
+}
+
 export interface RangeErrors {
   startError: string | null;
   endError: string | null;
@@ -79,20 +89,34 @@ export interface RangeErrors {
 
 const startAfterEndMessage = 'A data inicial deve ser anterior à final.';
 const endAfterMaxMessage = `A data final deve ser de no máximo ${dataLagDays} dias atrás.`;
+const startBeforeMinMessage = `A data inicial deve ser de no máximo ${maxLookbackYears} anos atrás.`;
 
 export function validateRange(
   { startDate, endDate }: DateRange,
   maxEndDate: string,
+  minStartDate: string,
 ): RangeErrors {
   const endError = endDate && endDate > maxEndDate ? endAfterMaxMessage : null;
   const startError =
-    startDate && endDate && startDate >= endDate ? startAfterEndMessage : null;
+    startDate && startDate < minStartDate
+      ? startBeforeMinMessage
+      : startDate && endDate && startDate >= endDate
+        ? startAfterEndMessage
+        : null;
 
   return { startError, endError };
 }
 
-export function isValidRange(range: DateRange, maxEndDate: string): boolean {
-  const { startError, endError } = validateRange(range, maxEndDate);
+export function isValidRange(
+  range: DateRange,
+  maxEndDate: string,
+  minStartDate: string,
+): boolean {
+  const { startError, endError } = validateRange(
+    range,
+    maxEndDate,
+    minStartDate,
+  );
   const hasBothDates = Boolean(range.startDate && range.endDate);
 
   return hasBothDates && !startError && !endError;

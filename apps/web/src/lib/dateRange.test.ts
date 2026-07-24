@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   isValidRange,
+  maskDateInput,
   matchPreset,
   resolveRange,
   validateRange,
@@ -82,12 +83,24 @@ describe('matchPreset', () => {
 
 describe('isValidRange', () => {
   const maxEndDate = '2026-07-17';
+  const minStartDate = '2024-07-17';
 
   it('accepts a coherent range ending exactly on the max end date', () => {
     expect(
       isValidRange(
         { startDate: '2026-07-12', endDate: '2026-07-17' },
         maxEndDate,
+        minStartDate,
+      ),
+    ).toBe(true);
+  });
+
+  it('accepts a start exactly on the min start date', () => {
+    expect(
+      isValidRange(
+        { startDate: '2024-07-17', endDate: '2026-07-17' },
+        maxEndDate,
+        minStartDate,
       ),
     ).toBe(true);
   });
@@ -97,6 +110,7 @@ describe('isValidRange', () => {
       isValidRange(
         { startDate: '2026-07-16', endDate: '2026-07-12' },
         maxEndDate,
+        minStartDate,
       ),
     ).toBe(false);
   });
@@ -106,14 +120,15 @@ describe('isValidRange', () => {
       isValidRange(
         { startDate: '2026-07-16', endDate: '2026-07-16' },
         maxEndDate,
+        minStartDate,
       ),
     ).toBe(false);
   });
 
   it('rejects missing dates', () => {
-    expect(isValidRange({ startDate: '', endDate: '' }, maxEndDate)).toBe(
-      false,
-    );
+    expect(
+      isValidRange({ startDate: '', endDate: '' }, maxEndDate, minStartDate),
+    ).toBe(false);
   });
 
   it('rejects an end past the max end date', () => {
@@ -121,6 +136,17 @@ describe('isValidRange', () => {
       isValidRange(
         { startDate: '2026-07-15', endDate: '2026-07-18' },
         maxEndDate,
+        minStartDate,
+      ),
+    ).toBe(false);
+  });
+
+  it('rejects a start before the min start date', () => {
+    expect(
+      isValidRange(
+        { startDate: '2024-07-16', endDate: '2026-07-17' },
+        maxEndDate,
+        minStartDate,
       ),
     ).toBe(false);
   });
@@ -128,12 +154,14 @@ describe('isValidRange', () => {
 
 describe('validateRange', () => {
   const maxEndDate = '2026-07-17';
+  const minStartDate = '2024-07-17';
 
   it('returns no errors for a coherent range', () => {
     expect(
       validateRange(
         { startDate: '2026-07-12', endDate: '2026-07-17' },
         maxEndDate,
+        minStartDate,
       ),
     ).toEqual({ startError: null, endError: null });
   });
@@ -142,6 +170,7 @@ describe('validateRange', () => {
     const { startError } = validateRange(
       { startDate: '2026-07-16', endDate: '2026-07-16' },
       maxEndDate,
+      minStartDate,
     );
 
     expect(startError).not.toBeNull();
@@ -151,8 +180,41 @@ describe('validateRange', () => {
     const { endError } = validateRange(
       { startDate: '2026-07-15', endDate: '2026-07-25' },
       maxEndDate,
+      minStartDate,
     );
 
     expect(endError).not.toBeNull();
+  });
+
+  it('flags the start when it is before the min start date', () => {
+    const { startError } = validateRange(
+      { startDate: '2024-01-01', endDate: '2026-07-17' },
+      maxEndDate,
+      minStartDate,
+    );
+
+    expect(startError).not.toBeNull();
+  });
+});
+
+describe('maskDateInput', () => {
+  it('inserts slashes as the digits are typed', () => {
+    expect(maskDateInput('2')).toBe('2');
+    expect(maskDateInput('22')).toBe('22');
+    expect(maskDateInput('2207')).toBe('22/07');
+    expect(maskDateInput('22072026')).toBe('22/07/2026');
+  });
+
+  it('strips non-digit characters', () => {
+    expect(maskDateInput('01/07/020dd22')).toBe('01/07/0202');
+    expect(maskDateInput('ab-cd')).toBe('');
+  });
+
+  it('caps the input at eight digits', () => {
+    expect(maskDateInput('220720261999')).toBe('22/07/2026');
+  });
+
+  it('keeps an already formatted date unchanged', () => {
+    expect(maskDateInput('22/07/2026')).toBe('22/07/2026');
   });
 });

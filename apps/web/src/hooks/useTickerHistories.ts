@@ -1,6 +1,11 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { isValidRange, maxEndDateIso, type DateRange } from '@/lib/dateRange';
+import {
+  isValidRange,
+  maxEndDateIso,
+  minStartDateIso,
+  type DateRange,
+} from '@/lib/dateRange';
 import {
   fetchTickerHistories,
   type HistoryErrorReason,
@@ -23,7 +28,9 @@ export function useTickerHistories(
   range: DateRange,
 ): TickerHistories {
   const symbols = tickers.map((ticker) => ticker.symbol).sort();
-  const enabled = tickers.length > 0 && isValidRange(range, maxEndDateIso());
+  const enabled =
+    tickers.length > 0 &&
+    isValidRange(range, maxEndDateIso(), minStartDateIso());
 
   const query = useQuery({
     queryKey: ['tickers', 'history', symbols, range],

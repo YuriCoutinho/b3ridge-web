@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { dateToIso, isoToDate } from '@/lib/dateRange';
+import { dateToIso, isoToDate, maskDateInput } from '@/lib/dateRange';
 
 const preloadCalendar = () =>
   import('@/components/ticker/date-range/DateFieldCalendar');
@@ -32,15 +32,20 @@ function formatDisplay(iso: string): string {
 }
 
 function parseDisplay(text: string): string | null {
+  if (text.length !== displayFormat.length) {
+    return null;
+  }
   const parsed = parse(text, displayFormat, new Date());
-  return isValid(parsed) ? dateToIso(parsed) : null;
+  const roundTrips = isValid(parsed) && format(parsed, displayFormat) === text;
+  return roundTrips ? dateToIso(parsed) : null;
 }
 
 interface DateFieldProps {
   label: string;
   value: string;
   onChange: (iso: string) => void;
-  error: string | null;
+  invalid: boolean;
+  errorId: string;
   disabled?: boolean;
   disabledDays: Matcher | Matcher[];
   defaultMonth: Date;
@@ -51,14 +56,14 @@ export function DateField({
   label,
   value,
   onChange,
-  error,
+  invalid,
+  errorId,
   disabled,
   disabledDays,
   defaultMonth,
   hint,
 }: DateFieldProps) {
   const inputId = useId();
-  const errorId = useId();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(() => formatDisplay(value));
 
@@ -67,13 +72,19 @@ export function DateField({
   }, [value]);
 
   const selectedDate = isoToDate(value);
-  const isInvalid = Boolean(error);
 
   function handleTextChange(next: string) {
-    setText(next);
-    const iso = parseDisplay(next);
+    const masked = maskDateInput(next);
+    setText(masked);
+    const iso = parseDisplay(masked);
     if (iso) {
       onChange(iso);
+    }
+  }
+
+  function handleBlur() {
+    if (!parseDisplay(text)) {
+      setText(formatDisplay(value));
     }
   }
 
@@ -105,9 +116,10 @@ export function DateField({
           placeholder="dd/mm/aaaa"
           inputMode="numeric"
           className="text-sm"
-          aria-invalid={isInvalid || undefined}
-          aria-describedby={isInvalid ? errorId : undefined}
+          aria-invalid={invalid || undefined}
+          aria-describedby={invalid ? errorId : undefined}
           onChange={(event) => handleTextChange(event.target.value)}
+          onBlur={handleBlur}
         />
         <InputGroupAddon align="inline-end">
           <Popover open={open} onOpenChange={setOpen}>
@@ -138,12 +150,6 @@ export function DateField({
           </Popover>
         </InputGroupAddon>
       </InputGroup>
-
-      {isInvalid && (
-        <p id={errorId} className="text-xs text-destructive">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
