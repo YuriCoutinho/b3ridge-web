@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
-import { useQueries, type UseQueryResult } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
-  fetchTickerHistory,
+  fetchTickerHistories,
   type Ticker,
   type TickerHistoryPoint,
+  type TickerHistoryResult,
 } from '@/services/tickers';
 import { isValidRange, maxEndDateIso, type DateRange } from '@/lib/dateRange';
 
@@ -16,37 +16,44 @@ type TickerHistory = {
 
 type TickerHistories = Record<string, TickerHistory>;
 
-export function useTickerHistories(tickers: Ticker[], range: DateRange) {
-  const enabled = isValidRange(range, maxEndDateIso());
+export function useTickerHistories(
+  tickers: Ticker[],
+  range: DateRange,
+): TickerHistories {
+  const symbols = tickers.map((ticker) => ticker.symbol).sort();
+  const enabled = tickers.length > 0 && isValidRange(range, maxEndDateIso());
 
-  const combine = useCallback(
-    (results: UseQueryResult<TickerHistoryPoint[]>[]) =>
-      Object.fromEntries(
-        tickers.map((ticker, index) => [
-          ticker.symbol,
-          {
-            data: results[index].data ?? [],
-            isPending: results[index].isPending,
-            isError: results[index].isError,
-            error: results[index].error,
-          },
-        ]),
-      ) as TickerHistories,
-    [tickers],
+  const query = useQuery({
+    queryKey: ['tickers', 'history', symbols, range],
+    queryFn: () => fetchTickerHistories(symbols, range),
+    enabled,
+    placeholderData: keepPreviousData,
+    meta: {
+      toast: {
+        success: 'Cotações atualizadas',
+        error: 'Falha ao carregar as cotações',
+      },
+    },
+  });
+
+  const bySymbol = new Map<string, TickerHistoryResult>(
+    query.data?.map((result) => [result.symbol, result]),
   );
 
-  return useQueries({
-    queries: tickers.map((ticker) => ({
-      queryKey: ['tickers', 'history', ticker.symbol, range],
-      queryFn: () => fetchTickerHistory(ticker.symbol, range),
-      enabled,
-      meta: {
-        toast: {
-          success: 'Cotações atualizadas',
-          error: 'Falha ao carregar as cotações',
+  return Object.fromEntries(
+    tickers.map((ticker) => {
+      const result = bySymbol.get(ticker.symbol);
+      const isError = query.isError || result?.status === 'error';
+
+      return [
+        ticker.symbol,
+        {
+          data: result?.status === 'ok' ? result.history : [],
+          isPending: query.isLoading,
+          isError,
+          error: query.error,
         },
-      },
-    })),
-    combine,
-  });
+      ];
+    }),
+  );
 }

@@ -92,7 +92,7 @@ function DateField({
   }
 
   return (
-    <div className="flex w-36 flex-col gap-1.5">
+    <div className="flex w-36 flex-col gap-1.5 max-[442px]:w-auto max-[442px]:flex-1">
       <div className="flex items-center gap-1">
         <label
           htmlFor={inputId}
@@ -194,7 +194,7 @@ export function DateRangeFields({
   ];
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 max-[442px]:w-full">
       <DateField
         label="Início"
         value={range.startDate}

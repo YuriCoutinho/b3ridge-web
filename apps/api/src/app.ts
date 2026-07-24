@@ -3,6 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import { apiRouter } from './routes/index.js';
+import { docsRouter } from './routes/docs.router.js';
 import { healthRouter } from './routes/health.router.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFound } from './middlewares/notFound.js';
@@ -15,6 +16,7 @@ export function createApp() {
   app.use(cors({ origin: env.corsOrigins }));
 
   app.use(healthRouter);
+  app.use('/api/docs', docsRouter);
 
   app.use(globalRateLimiter);
 

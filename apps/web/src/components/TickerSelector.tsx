@@ -13,9 +13,9 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from '@/components/ui/combobox';
+import { maxBatchSymbols } from '@b3ridge/contracts';
 import { Button } from '@/components/ui/button';
 import { useTickers } from '@/hooks/useTickers';
-import { MAX_SELECTED_TICKERS } from '@/hooks/useTickerSelection';
 import type { Ticker } from '@/services/tickers';
 
 const MAX_VISIBLE_CHIPS = 2;
@@ -34,7 +34,7 @@ export function TickerSelector({
   const { tickers, isPending, isError, refetch } = useTickers();
 
   const hasSelection = selected.length > 0;
-  const atLimit = selected.length >= MAX_SELECTED_TICKERS;
+  const atLimit = selected.length >= maxBatchSymbols;
   const isSelected = (ticker: Ticker) =>
     selected.some((item) => item.symbol === ticker.symbol);
 
@@ -135,7 +135,7 @@ export function TickerSelector({
 
       {atLimit && (
         <p className="text-xs text-muted-foreground">
-          Máximo de {MAX_SELECTED_TICKERS} ativos.
+          Máximo de {maxBatchSymbols} ativos.
         </p>
       )}
     </div>

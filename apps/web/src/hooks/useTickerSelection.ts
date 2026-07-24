@@ -1,13 +1,12 @@
 import { useState } from 'react';
+import { maxBatchSymbols } from '@b3ridge/contracts';
 import type { Ticker } from '@/services/tickers';
-
-export const MAX_SELECTED_TICKERS = 8;
 
 export function useTickerSelection() {
   const [selected, setSelected] = useState<Ticker[]>([]);
 
   const changeSelection = (tickers: Ticker[]) => {
-    setSelected(tickers.slice(0, MAX_SELECTED_TICKERS));
+    setSelected(tickers.slice(0, maxBatchSymbols));
   };
 
   return { selected, setSelected: changeSelection };

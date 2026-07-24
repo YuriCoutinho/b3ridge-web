@@ -7,4 +7,5 @@ catalog:
   zod: ^4.4.3
   vitest: ^4.1.10
 allowBuilds:
+  '@scarf/scarf': false
   esbuild: true
