@@ -8,4 +8,4 @@ export const tickersRouter = Router();
 tickersRouter.use(tickersRateLimiter);
 
 tickersRouter.get('/', listTickers);
-tickersRouter.get('/:symbol/history', getHistory);
+tickersRouter.get('/history', getHistory);
