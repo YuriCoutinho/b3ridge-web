@@ -1,4 +1,9 @@
 import {
+  dataLagDays,
+  maxEndDateIso,
+  type TickerHistoryQuery,
+} from '@b3ridge/contracts';
+import {
   format,
   isValid,
   parse,
@@ -7,11 +12,6 @@ import {
   subMonths,
   subYears,
 } from 'date-fns';
-import {
-  dataLagDays,
-  maxEndDateIso,
-  type TickerHistoryQuery,
-} from '@b3ridge/contracts';
 
 export type DateRange = TickerHistoryQuery;
 
@@ -20,6 +20,8 @@ export { dataLagDays, maxEndDateIso };
 const isoFormat = 'yyyy-MM-dd';
 
 export type RangePreset = '5d' | '1m' | '3m' | '6m' | '1y' | 'ytd';
+
+export const defaultPreset: RangePreset = '5d';
 
 export const rangePresets: { id: RangePreset; label: string }[] = [
   { id: '5d', label: '5D' },

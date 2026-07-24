@@ -17,12 +17,13 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
+import type { TickerSummary } from '@/lib/series';
 
 interface PriceChartCanvasProps {
   rows: Record<string, number>[];
   config: ChartConfig;
   series: { symbol: string }[];
-  summaries: { symbol: string; changePct: number; colorVar: string }[];
+  summaries: TickerSummary[];
   failureLines: string[];
 }
 

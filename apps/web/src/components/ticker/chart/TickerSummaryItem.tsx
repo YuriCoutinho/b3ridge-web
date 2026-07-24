@@ -1,7 +1,6 @@
 import { ArrowDownRightIcon, ArrowUpRightIcon } from 'lucide-react';
 
-import type { TickerSummary } from '@/components/ticker/chart/TickerSummaryList';
-import { formatChangePct } from '@/lib/series';
+import { formatChangePct, type TickerSummary } from '@/lib/series';
 import { cn } from '@/lib/utils';
 
 export function TickerSummaryItem({

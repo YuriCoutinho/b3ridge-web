@@ -1,4 +1,5 @@
 import { startOfDay } from 'date-fns';
+
 import type { TickerHistoryPoint } from '@/services/tickers';
 
 export interface PercentPoint {
@@ -7,6 +8,12 @@ export interface PercentPoint {
 }
 
 export type ChartRow = { date: number } & Record<string, number>;
+
+export interface TickerSummary {
+  symbol: string;
+  changePct: number;
+  colorVar: string;
+}
 
 const paletteSize = 8;
 

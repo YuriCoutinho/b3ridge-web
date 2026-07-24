@@ -1,10 +1,5 @@
 import { TickerSummaryItem } from '@/components/ticker/chart/TickerSummaryItem';
-
-export interface TickerSummary {
-  symbol: string;
-  changePct: number;
-  colorVar: string;
-}
+import type { TickerSummary } from '@/lib/series';
 
 interface TickerSummaryListProps {
   items: TickerSummary[];
