@@ -3,7 +3,6 @@ import { env } from '../../config/env.js';
 import { toMessage } from '../../lib/toMessage.js';
 import { BrapiError } from './errors.js';
 
-const BRAPI_BASE_URL = 'https://brapi.dev/api';
 const REQUEST_TIMEOUT_MS = 8000;
 
 function brapiHeaders(): Record<string, string> {
@@ -15,7 +14,7 @@ export async function brapiGet<T>(
   query: Record<string, string>,
   schema: z.ZodType<T>,
 ): Promise<T> {
-  const url = `${BRAPI_BASE_URL}${path}?${new URLSearchParams(query)}`;
+  const url = `${env.brapiUrl}${path}?${new URLSearchParams(query)}`;
 
   let response: Response;
   try {

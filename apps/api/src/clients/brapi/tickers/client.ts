@@ -1,5 +1,7 @@
-import { brapiGet } from './httpClient.js';
-import { brapiPageSchema, type BrapiPage } from './schemas.js';
+import type { Ticker } from '@b3ridge/contracts';
+import { brapiGet } from '../httpClient.js';
+import { mapTickers } from './mapper.js';
+import { brapiPageSchema, type BrapiPage } from './schema.js';
 
 const PAGE_LIMIT = 2000;
 const SORT_BY = 'marketCap';
@@ -18,7 +20,7 @@ async function fetchTickersPage(page: number): Promise<BrapiPage> {
   );
 }
 
-export async function fetchAllTickerPages(): Promise<BrapiPage[]> {
+export async function fetchTickers(): Promise<Ticker[]> {
   const firstPage = await fetchTickersPage(1);
   const totalPages = Math.ceil(firstPage.pagination.totalItems / PAGE_LIMIT);
 
@@ -28,5 +30,5 @@ export async function fetchAllTickerPages(): Promise<BrapiPage[]> {
   }
 
   const rest = await Promise.all(remainingPages);
-  return [firstPage, ...rest];
+  return mapTickers([firstPage, ...rest]);
 }

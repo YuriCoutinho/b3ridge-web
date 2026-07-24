@@ -1,8 +1,7 @@
 import type { TickerHistoryPoint } from '@b3ridge/contracts';
-import { fetchTickerHistory } from '../clients/brapi/history.js';
+import { fetchTickerHistory } from '../clients/brapi/history/client.js';
 import { getJson, setJson } from '../cache/redis.js';
 import type { DateRange } from '../lib/dateRange.js';
-import { mergeHistory } from '../lib/mergeHistory.js';
 
 const CACHE_TTL_SECONDS = 60 * 60 * 6;
 
@@ -18,7 +17,7 @@ export async function getTickerHistory(
   const cached = await getJson<TickerHistoryPoint[]>(key);
   if (cached) return cached;
 
-  const history = mergeHistory(await fetchTickerHistory(symbol, range));
+  const history = await fetchTickerHistory(symbol, range);
   await setJson(key, history, CACHE_TTL_SECONDS);
   return history;
 }
