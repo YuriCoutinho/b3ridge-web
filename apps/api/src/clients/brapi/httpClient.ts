@@ -27,7 +27,8 @@ export async function brapiGet<T>(
   }
 
   if (!response.ok) {
-    throw new BrapiError(`brapi responded ${response.status}`, 502);
+    const status = response.status === 404 ? 404 : 502;
+    throw new BrapiError(`brapi responded ${response.status}`, status);
   }
 
   const parsed = schema.safeParse(await response.json());
