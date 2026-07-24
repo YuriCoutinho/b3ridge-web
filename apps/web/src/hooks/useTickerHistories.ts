@@ -1,17 +1,19 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+
+import { isValidRange, maxEndDateIso, type DateRange } from '@/lib/dateRange';
 import {
   fetchTickerHistories,
+  type HistoryErrorReason,
   type Ticker,
   type TickerHistoryPoint,
   type TickerHistoryResult,
 } from '@/services/tickers';
-import { isValidRange, maxEndDateIso, type DateRange } from '@/lib/dateRange';
 
 type TickerHistory = {
   data: TickerHistoryPoint[];
   isPending: boolean;
   isError: boolean;
-  error: Error | null;
+  reason: HistoryErrorReason | null;
 };
 
 type TickerHistories = Record<string, TickerHistory>;
@@ -43,15 +45,20 @@ export function useTickerHistories(
   return Object.fromEntries(
     tickers.map((ticker) => {
       const result = bySymbol.get(ticker.symbol);
-      const isError = query.isError || result?.status === 'error';
+      const reason: HistoryErrorReason | null =
+        result?.status === 'error'
+          ? result.reason
+          : query.isError
+            ? 'upstream_error'
+            : null;
 
       return [
         ticker.symbol,
         {
           data: result?.status === 'ok' ? result.history : [],
           isPending: query.isLoading,
-          isError,
-          error: query.error,
+          isError: reason !== null,
+          reason,
         },
       ];
     }),
