@@ -1,5 +1,6 @@
-import { describe, it, expect, afterEach, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { useTickerHistories } from '@/hooks/useTickerHistories';
 import { fetchTickerHistories, type Ticker } from '@/services/tickers';
 import { createQueryWrapper } from '@/test/queryWrapper';
@@ -43,8 +44,10 @@ describe('useTickerHistories', () => {
       expect(result.current.PETR4.data).toEqual([point(1)]);
     });
     expect(result.current.PETR4.isError).toBe(false);
+    expect(result.current.PETR4.reason).toBe(null);
     expect(result.current.VALE3.data).toEqual([]);
     expect(result.current.VALE3.isError).toBe(true);
+    expect(result.current.VALE3.reason).toBe('not_found');
     expect(fetchTickerHistories).toHaveBeenCalledTimes(1);
     expect(fetchTickerHistories).toHaveBeenCalledWith(
       ['PETR4', 'VALE3'],

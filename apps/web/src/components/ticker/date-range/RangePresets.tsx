@@ -16,6 +16,13 @@ export function RangePresets({
 }: RangePresetsProps) {
   const labelId = useId();
 
+  function handleValueChange(groupValue: string[]) {
+    const [next] = groupValue as RangePreset[];
+    if (next) {
+      onSelectPreset(next);
+    }
+  }
+
   return (
     <div className="flex w-fit flex-col gap-1.5">
       <span
@@ -31,12 +38,7 @@ export function RangePresets({
         size="sm"
         disabled={disabled}
         value={value ? [value] : []}
-        onValueChange={(groupValue) => {
-          const [next] = groupValue as RangePreset[];
-          if (next) {
-            onSelectPreset(next);
-          }
-        }}
+        onValueChange={handleValueChange}
       >
         {rangePresets.map((preset) => (
           <ToggleGroupItem
