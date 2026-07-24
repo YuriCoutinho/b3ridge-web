@@ -1,5 +1,6 @@
-import { describe, it, expect, afterEach, vi } from 'vitest';
-import { fetchTickers, fetchTickerHistories } from '@/services/tickers';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { fetchTickerHistories, fetchTickers } from '@/services/tickers';
 
 const range = { startDate: '2026-07-12', endDate: '2026-07-19' };
 

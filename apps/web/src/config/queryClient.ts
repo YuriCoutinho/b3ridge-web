@@ -1,5 +1,6 @@
 import { QueryCache, QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
 import { ApiError } from '../services/client';
 
 declare module '@tanstack/react-query' {

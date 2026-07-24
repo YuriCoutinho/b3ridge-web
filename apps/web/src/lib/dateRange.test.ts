@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
-  resolveRange,
   isValidRange,
   matchPreset,
+  resolveRange,
   validateRange,
 } from '@/lib/dateRange';
 

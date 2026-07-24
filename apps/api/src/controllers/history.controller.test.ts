@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response } from 'express';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { getTickerHistories } from '../services/history.service.js';
 import { getHistory } from './history.controller.js';
 

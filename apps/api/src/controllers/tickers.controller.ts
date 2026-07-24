@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+
 import { getTickers } from '../services/tickers.service.js';
 
 export async function listTickers(

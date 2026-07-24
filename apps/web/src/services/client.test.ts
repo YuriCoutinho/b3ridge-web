@@ -1,6 +1,7 @@
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { request, ApiError } from '@/services/client';
+
+import { ApiError, request } from '@/services/client';
 
 const schema = z.object({ value: z.number() });
 

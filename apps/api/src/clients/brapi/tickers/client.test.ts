@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { brapiGet } from '../httpClient.js';
 import { fetchTickers } from './client.js';
 import type { BrapiPage, BrapiTicker } from './schema.js';
