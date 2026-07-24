@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background with slight transparency matching the image style if needed, but solid black is cleaner for favicon -->
+  <rect width="100" height="100" rx="30" ry="30" fill="#1C1C1C"/>
+  
+  <!-- L-shape axes -->
+  <path d="M 30 30 L 30 70 L 70 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Trend line -->
+  <path d="M 40 55 L 47 48 L 54 55 L 65 44" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
