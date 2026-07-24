@@ -1,11 +1,9 @@
 import { format, isValid, parse } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { lazy, Suspense, useEffect, useId, useState } from 'react';
 import type { Matcher } from 'react-day-picker';
 
 import { InfoHint } from '@/components/ticker/date-range/InfoHint';
-import { Calendar } from '@/components/ui/calendar';
 import {
   InputGroup,
   InputGroupAddon,
@@ -18,6 +16,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { dateToIso, isoToDate } from '@/lib/dateRange';
+
+const preloadCalendar = () =>
+  import('@/components/ticker/date-range/DateFieldCalendar');
+
+const DateFieldCalendar = lazy(() =>
+  preloadCalendar().then((module) => ({ default: module.DateFieldCalendar })),
+);
 
 const displayFormat = 'dd/MM/yyyy';
 
@@ -113,21 +118,22 @@ export function DateField({
                   variant="ghost"
                   disabled={disabled}
                   aria-label={`Abrir calendário de ${label.toLowerCase()}`}
+                  onMouseEnter={preloadCalendar}
+                  onFocus={preloadCalendar}
                 />
               }
             >
               <CalendarIcon />
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                locale={ptBR}
-                selected={selectedDate}
-                defaultMonth={selectedDate ?? defaultMonth}
-                disabled={disabledDays}
-                onSelect={handleCalendarSelect}
-                autoFocus
-              />
+              <Suspense fallback={null}>
+                <DateFieldCalendar
+                  selected={selectedDate}
+                  defaultMonth={selectedDate ?? defaultMonth}
+                  disabledDays={disabledDays}
+                  onSelect={handleCalendarSelect}
+                />
+              </Suspense>
             </PopoverContent>
           </Popover>
         </InputGroupAddon>
