@@ -10,6 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Detect changed areas
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/contracts/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/contracts/**'
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
 
@@ -28,8 +40,13 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Test
-        run: pnpm test:run
+      - name: Test API
+        if: steps.changes.outputs.api == 'true'
+        run: pnpm --filter @b3ridge/api test:run
+
+      - name: Test Web
+        if: steps.changes.outputs.web == 'true'
+        run: pnpm --filter @b3ridge/web test:run
 
       - name: Build
         run: pnpm build
