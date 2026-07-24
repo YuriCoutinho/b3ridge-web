@@ -1,8 +1,13 @@
 import rateLimit from 'express-rate-limit';
 
-export const rateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+function createRateLimiter(windowMs: number, limit: number) {
+  return rateLimit({
+    windowMs,
+    limit,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+}
+
+export const globalRateLimiter = createRateLimiter(15 * 60 * 1000, 100);
+export const tickersRateLimiter = createRateLimiter(60 * 1000, 30);

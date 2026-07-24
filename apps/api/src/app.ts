@@ -6,7 +6,7 @@ import { apiRouter } from './routes/index.js';
 import { healthRouter } from './routes/health.router.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFound } from './middlewares/notFound.js';
-import { rateLimiter } from './middlewares/rateLimiter.js';
+import { globalRateLimiter } from './middlewares/rateLimiter.js';
 
 export function createApp() {
   const app = express();
@@ -16,7 +16,7 @@ export function createApp() {
 
   app.use(healthRouter);
 
-  app.use(rateLimiter);
+  app.use(globalRateLimiter);
 
   app.use('/api', apiRouter);
 
