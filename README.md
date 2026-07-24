@@ -1,55 +1,86 @@
-# B3ridge Web (Frontend)
+# B3ridge
 
-Frontend do B3ridge, uma ferramenta para consultar o histórico de preços de fechamento de ativos da B3 (bolsa brasileira) e visualizar sua evolução em um gráfico de linha comparativo.
+Ferramenta para consultar o histórico de preços de fechamento de ativos da B3 (bolsa brasileira) e visualizar sua evolução em um gráfico de linha comparativo.
 
 O usuário escolhe um ou mais ativos, define um período e recebe um gráfico com a evolução de cada um. Como ativos têm preços muito diferentes entre si, as séries são normalizadas em variação percentual desde o início do período, permitindo comparar tudo na mesma escala.
 
-Live: https://yuricoutinho.github.io/b3ridge-web/
+Live (frontend): https://yuricoutinho.github.io/b3ridge-web/
 
-Este repositório contém apenas o frontend. O backend, que conversa com a fonte de dados externa, valida, calcula e cacheia, vive em um repositório separado.
+Este é um monorepo com o frontend, o backend interno e os contratos compartilhados entre eles.
+
+## Estrutura do monorepo
+
+| Pacote               | Papel                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| `apps/web`           | SPA em React que renderiza a seleção de ativos e o gráfico.                                |
+| `apps/api`           | Backend interno (BFF) que valida, busca na brapi, cacheia no Redis e projeta o payload.    |
+| `packages/contracts` | Schemas Zod e tipos compartilhados entre web e api (fonte única de verdade dos contratos). |
+
+## Documentação
+
+| Documento                             | Onde                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Referência da API (endpoints, shapes) | Swagger UI em `/api/docs` com a API no ar (spec em `/api/docs/openapi.json`)                      |
+| Backend: decisões e diagramas         | [`docs/architecture.md`](./docs/architecture.md)                                                  |
+| Frontend: visão geral                 | Seções [Funcionalidades](#funcionalidades) e [Arquitetura de dados](#arquitetura-de-dados) abaixo |
+
+O Swagger é gerado a partir dos schemas Zod em `packages/contracts`, então a referência de endpoints nunca diverge do código. O documento de arquitetura cobre o "porquê" e os fluxos transversais que uma spec não expressa, sem repetir a referência de endpoints.
 
 ## Funcionalidades
 
-- Seleção de ativos com busca por texto (código ou nome) e seleção múltipla.
-- Período por calendário ou por atalhos prontos (7D, 1M, 3M, 6M, 1A, YTD).
-- Consulta reativa: a busca dispara ao alterar ativos, datas ou preset, respeitando a validação do formulário.
+- Seleção de ativos com busca por texto (código ou nome) e seleção múltipla (até 4).
+- Período por calendário ou por atalhos prontos (5D, 1M, 3M, 6M, 1A, YTD).
+- Consulta sob demanda: o usuário monta o filtro e dispara a busca no botão Consultar.
 - Gráfico de linha combinado, uma linha por ativo, normalizadas em variação percentual.
 - Resumo de variação percentual por ativo.
-- Estados de loading, erro total e falha parcial.
+- Estados de loading, erro total e falha parcial (um ativo pode falhar sem derrubar os demais).
 - Layout responsivo para desktop e mobile.
 
 ## Arquitetura de dados
 
-O frontend nunca busca preços direto na fonte externa. Ele sempre pergunta ao backend, que decide entre buscar novo dado ou reaproveitar o que já está em cache. Isso protege o limite de requisições da fonte externa e acelera consultas repetidas.
+O frontend nunca busca preços direto na fonte externa. Ele sempre pergunta ao backend interno, que decide entre buscar novo dado ou reaproveitar o que já está em cache. Isso protege o limite de requisições da brapi e acelera consultas repetidas.
 
 ```
-Frontend -> Backend -> Fonte de dados externa (B3)
+apps/web  ->  apps/api  ->  brapi (fonte de dados da B3)
+                  |
+                Redis (cache)
 ```
 
-A lista de ativos (`GET /api/tickers`) e o histórico de preços (`GET /api/tickers/:symbol/history`) passam pelo backend interno, que busca na fonte externa, projeta o payload mínimo e cacheia no Redis. Como o plano usado na fonte externa limita consultas por data a janelas de 90 dias, o backend quebra períodos maiores em múltiplas requisições e mescla o resultado antes de cachear.
+A lista de ativos (`GET /api/tickers`) e o histórico de preços em lote (`GET /api/tickers/history`) passam pelo backend, que busca na brapi, projeta o payload mínimo e cacheia no Redis. Como o plano usado na brapi limita consultas por data a janelas de 90 dias, o backend quebra períodos maiores em múltiplas requisições e mescla o resultado antes de cachear. Detalhes e diagramas em [`docs/architecture.md`](./docs/architecture.md).
 
 ## Stack
 
-- React 19, TypeScript e Vite
+- React 19, TypeScript e Vite no frontend
+- Express 5 e ioredis no backend, com Helmet e rate limiting
+- Zod para validação e contratos compartilhados
+- TanStack Query e Recharts para dados e gráfico
+- shadcn/ui e Tailwind para a UI
 - Vitest e Testing Library para testes unitários
 - Oxlint para lint e Prettier para formatação
 - Husky, lint-staged e Commitlint para Conventional Commits
-- pnpm via corepack
-- GitHub Actions para CI e deploy no GitHub Pages
-
-UI (shadcn/ui e Tailwind) e dados (TanStack Query e Recharts) chegam nas entregas seguintes.
+- pnpm workspaces via corepack
+- GitHub Actions para CI (lint, typecheck, testes e build)
 
 ## Começando
 
 Requisitos: Node 24 (fixado no `.nvmrc`), pnpm via corepack e Docker (para o Redis local).
 
 ```bash
+git clone https://github.com/yuricoutinho/b3ridge-web.git
+cd b3ridge-web
+
 nvm use
 corepack enable
 pnpm install
-docker compose up -d redis   # Redis para o cache do backend
-pnpm dev                     # sobe web e api em paralelo
+
+cp apps/api/.env.example apps/api/.env    # ajuste BRAPI_TOKEN se tiver
+cp apps/web/.env.example apps/web/.env     # VITE_INTERNAL_API_URL=http://localhost:3333
+
+docker compose up -d redis                 # Redis para o cache do backend
+pnpm dev                                    # sobe web e api em paralelo
 ```
+
+Com tudo no ar: frontend em `http://localhost:5173`, API em `http://localhost:3333` e Swagger em `http://localhost:3333/api/docs`.
 
 ## Variáveis de ambiente
 
@@ -57,39 +88,38 @@ Configure cada app com um `.env` local (a partir do seu `.env.example`).
 
 `apps/api/.env`:
 
-| Variável       | Obrigatória | Descrição                                                                                  |
-| -------------- | ----------- | ------------------------------------------------------------------------------------------ |
-| `PORT`         | não         | Porta do backend (padrão `3333`).                                                          |
-| `CORS_ORIGINS` | sim         | Allowlist de origens separada por vírgula (nunca `*`), ex.: `http://localhost:5173`.       |
-| `REDIS_URL`    | sim         | Conexão do Redis, ex.: `redis://localhost:6379`.                                           |
-| `BRAPI_TOKEN`  | não         | Token da brapi enviado como `Bearer` quando presente (a rota de tickers funciona sem ele). |
+| Variável       | Obrigatória | Descrição                                                                            |
+| -------------- | ----------- | ------------------------------------------------------------------------------------ |
+| `PORT`         | não         | Porta do backend (padrão `3333`).                                                    |
+| `CORS_ORIGINS` | sim         | Allowlist de origens separada por vírgula (nunca `*`), ex.: `http://localhost:5173`. |
+| `REDIS_URL`    | sim         | Conexão do Redis, ex.: `redis://localhost:6379`.                                     |
+| `BRAPI_URL`    | sim         | Base da brapi, ex.: `https://brapi.dev/api`.                                         |
+| `BRAPI_TOKEN`  | não         | Token da brapi enviado como `Bearer` quando presente.                                |
 
 `apps/web/.env`:
 
-| Variável                | Obrigatória | Descrição                                            |
-| ----------------------- | ----------- | ----------------------------------------------------- |
+| Variável                | Obrigatória | Descrição                                              |
+| ----------------------- | ----------- | ------------------------------------------------------ |
 | `VITE_INTERNAL_API_URL` | sim         | Base do backend interno, ex.: `http://localhost:3333`. |
 
-## Scripts
+## Scripts (raiz)
 
-| Script           | Descrição                      |
-| ---------------- | ------------------------------ |
-| `pnpm dev`       | Servidor de desenvolvimento.   |
-| `pnpm build`     | Typecheck e build de produção. |
-| `pnpm preview`   | Serve o build de produção.     |
-| `pnpm typecheck` | Checagem de tipos.             |
-| `pnpm test`      | Testes em modo watch.          |
-| `pnpm test:run`  | Testes uma vez (CI).           |
-| `pnpm test:cov`  | Testes com cobertura.          |
-| `pnpm lint`      | Lint com Oxlint.               |
-| `pnpm format`    | Formata com Prettier.          |
+| Script           | Descrição                                |
+| ---------------- | ---------------------------------------- |
+| `pnpm dev`       | Sobe web e api em paralelo.              |
+| `pnpm build`     | Build de produção do frontend.           |
+| `pnpm typecheck` | Checagem de tipos em todos os pacotes.   |
+| `pnpm test:run`  | Testes uma vez em todos os pacotes (CI). |
+| `pnpm lint`      | Lint com Oxlint.                         |
+| `pnpm format`    | Formata com Prettier.                    |
 
-## Qualidade e CI/CD
+Cada app também expõe seus próprios scripts (`pnpm --filter @b3ridge/api dev`, `pnpm --filter @b3ridge/web test`, etc.).
+
+## Qualidade e CI
 
 - Pre-commit com Husky e lint-staged: Oxlint e Prettier nos arquivos alterados.
 - Commitlint valida a mensagem no padrão Conventional Commits.
 - CI (`ci.yml`) roda lint, typecheck, testes e build em todo PR.
-- Deploy (`deploy.yml`) publica no GitHub Pages a cada push na `main`.
 
 ## Fora de escopo
 
