@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 
-import { DateRangeFields } from '@/components/ticker/DateRangeFields';
+import { DateRangeFields } from '@/components/ticker/date-range/DateRangeFields';
 
 const range = { startDate: '2026-07-14', endDate: '2026-07-19' };
 const noErrors = { startError: null, endError: null };
@@ -81,5 +81,33 @@ describe('DateRangeFields', () => {
       'aria-invalid',
       'true',
     );
+  });
+
+  it('toggles the hint tooltip on click and hides it on blur', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DateRangeFields
+        range={range}
+        onChangeRange={vi.fn()}
+        errors={noErrors}
+      />,
+    );
+
+    const hint = /Cotações com defasagem/;
+    const trigger = screen.getByRole('button', { name: hint });
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+    await user.click(trigger);
+    expect(screen.getByRole('tooltip')).toHaveTextContent(hint);
+
+    await user.click(trigger);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+    await user.click(trigger);
+    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    await user.click(document.body);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 });

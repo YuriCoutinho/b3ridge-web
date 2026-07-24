@@ -1,15 +1,9 @@
-import { useEffect, useId, useState } from 'react';
-import { format, parse, isValid, addDays, subDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, InfoIcon } from 'lucide-react';
+import { format, isValid, parse } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { lazy, Suspense, useEffect, useId, useState } from 'react';
 import type { Matcher } from 'react-day-picker';
 
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { InfoHint } from '@/components/ticker/date-range/InfoHint';
 import {
   InputGroup,
   InputGroupAddon,
@@ -21,14 +15,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  dataLagDays,
-  dateToIso,
-  isoToDate,
-  maxEndDateIso,
-  type DateRange,
-  type RangeErrors,
-} from '@/lib/dateRange';
+import { dateToIso, isoToDate } from '@/lib/dateRange';
+
+const preloadCalendar = () =>
+  import('@/components/ticker/date-range/DateFieldCalendar');
+
+const DateFieldCalendar = lazy(() =>
+  preloadCalendar().then((module) => ({ default: module.DateFieldCalendar })),
+);
 
 const displayFormat = 'dd/MM/yyyy';
 
@@ -53,7 +47,7 @@ interface DateFieldProps {
   hint?: string;
 }
 
-function DateField({
+export function DateField({
   label,
   value,
   onChange,
@@ -100,22 +94,7 @@ function DateField({
         >
           {label}
         </label>
-        {hint && (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  aria-label={hint}
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                />
-              }
-            >
-              <InfoIcon className="size-3.5" />
-            </TooltipTrigger>
-            <TooltipContent>{hint}</TooltipContent>
-          </Tooltip>
-        )}
+        {hint && <InfoHint text={hint} />}
       </div>
 
       <InputGroup>
@@ -139,21 +118,22 @@ function DateField({
                   variant="ghost"
                   disabled={disabled}
                   aria-label={`Abrir calendário de ${label.toLowerCase()}`}
+                  onMouseEnter={preloadCalendar}
+                  onFocus={preloadCalendar}
                 />
               }
             >
               <CalendarIcon />
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                locale={ptBR}
-                selected={selectedDate}
-                defaultMonth={selectedDate ?? defaultMonth}
-                disabled={disabledDays}
-                onSelect={handleCalendarSelect}
-                autoFocus
-              />
+              <Suspense fallback={null}>
+                <DateFieldCalendar
+                  selected={selectedDate}
+                  defaultMonth={selectedDate ?? defaultMonth}
+                  disabledDays={disabledDays}
+                  onSelect={handleCalendarSelect}
+                />
+              </Suspense>
             </PopoverContent>
           </Popover>
         </InputGroupAddon>
@@ -164,56 +144,6 @@ function DateField({
           {error}
         </p>
       )}
-    </div>
-  );
-}
-
-interface DateRangeFieldsProps {
-  range: DateRange;
-  onChangeRange: (next: DateRange) => void;
-  errors: RangeErrors;
-  disabled?: boolean;
-}
-
-export function DateRangeFields({
-  range,
-  onChangeRange,
-  errors,
-  disabled,
-}: DateRangeFieldsProps) {
-  const maxEndDate = isoToDate(maxEndDateIso())!;
-  const startDate = isoToDate(range.startDate);
-  const endDate = isoToDate(range.endDate);
-
-  const startDisabledDays: Matcher = {
-    after: endDate ? subDays(endDate, 1) : maxEndDate,
-  };
-  const endDisabledDays: Matcher[] = [
-    { after: maxEndDate },
-    ...(startDate ? [{ before: addDays(startDate, 1) }] : []),
-  ];
-
-  return (
-    <div className="flex gap-3 max-[442px]:w-full">
-      <DateField
-        label="Início"
-        value={range.startDate}
-        onChange={(startDate) => onChangeRange({ ...range, startDate })}
-        error={errors.startError}
-        disabled={disabled}
-        disabledDays={startDisabledDays}
-        defaultMonth={maxEndDate}
-      />
-      <DateField
-        label="Fim"
-        value={range.endDate}
-        onChange={(endDate) => onChangeRange({ ...range, endDate })}
-        error={errors.endError}
-        disabled={disabled}
-        disabledDays={endDisabledDays}
-        defaultMonth={maxEndDate}
-        hint={`Cotações com defasagem de até ${dataLagDays} dias.`}
-      />
     </div>
   );
 }
