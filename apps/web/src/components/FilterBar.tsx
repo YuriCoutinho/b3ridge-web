@@ -1,4 +1,4 @@
-import type { SubmitEvent } from 'react';
+import { useId, type SubmitEvent } from 'react';
 
 import { DateRangeFields } from '@/components/ticker/date-range/DateRangeFields';
 import { RangePresets } from '@/components/ticker/date-range/RangePresets';
@@ -9,6 +9,7 @@ import { useTickerSelection } from '@/hooks/useTickerSelection';
 import {
   isValidRange,
   maxEndDateIso,
+  minStartDateIso,
   validateRange,
   type DateRange,
 } from '@/lib/dateRange';
@@ -22,9 +23,13 @@ export function FilterBar({ onApply }: FilterBarProps) {
   const { selected, setSelected } = useTickerSelection();
   const { range, activePreset, applyPreset, changeRange } = useDateRange();
 
+  const startErrorId = useId();
+  const endErrorId = useId();
+
   const hasSelection = selected.length > 0;
-  const rangeErrors = validateRange(range, maxEndDateIso());
-  const canSubmit = hasSelection && isValidRange(range, maxEndDateIso());
+  const rangeErrors = validateRange(range, maxEndDateIso(), minStartDateIso());
+  const canSubmit =
+    hasSelection && isValidRange(range, maxEndDateIso(), minStartDateIso());
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,21 +51,36 @@ export function FilterBar({ onApply }: FilterBarProps) {
         disabled={!hasSelection}
       />
 
-      <div className="flex flex-wrap items-end gap-x-6 gap-y-4 max-[442px]:w-full">
-        <DateRangeFields
-          range={range}
-          onChangeRange={changeRange}
-          errors={rangeErrors}
-          disabled={!hasSelection}
-        />
+      <div className="flex flex-col gap-1.5 max-[442px]:w-full">
+        <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
+          <DateRangeFields
+            range={range}
+            onChangeRange={changeRange}
+            errors={rangeErrors}
+            startErrorId={startErrorId}
+            endErrorId={endErrorId}
+            disabled={!hasSelection}
+          />
 
-        <Button
-          type="submit"
-          disabled={!canSubmit}
-          className="max-[442px]:h-10 max-[442px]:w-full"
-        >
-          Consultar
-        </Button>
+          <Button
+            type="submit"
+            disabled={!canSubmit}
+            className="max-[442px]:h-10 max-[442px]:w-full"
+          >
+            Consultar
+          </Button>
+        </div>
+
+        {rangeErrors.startError && (
+          <p id={startErrorId} className="text-xs text-destructive">
+            {rangeErrors.startError}
+          </p>
+        )}
+        {rangeErrors.endError && (
+          <p id={endErrorId} className="text-xs text-destructive">
+            {rangeErrors.endError}
+          </p>
+        )}
       </div>
     </form>
   );

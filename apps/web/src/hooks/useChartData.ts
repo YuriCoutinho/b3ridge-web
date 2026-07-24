@@ -1,6 +1,11 @@
 import type { ChartConfig } from '@/components/ui/chart';
 import { useTickerHistories } from '@/hooks/useTickerHistories';
-import { isValidRange, maxEndDateIso, type DateRange } from '@/lib/dateRange';
+import {
+  isValidRange,
+  maxEndDateIso,
+  minStartDateIso,
+  type DateRange,
+} from '@/lib/dateRange';
 import {
   buildChartRows,
   colorVarForIndex,
@@ -60,7 +65,7 @@ export function useChartData(selected: Ticker[], range: DateRange): ChartData {
     ...histories[ticker.symbol],
   }));
 
-  if (!isValidRange(range, maxEndDateIso())) {
+  if (!isValidRange(range, maxEndDateIso(), minStartDateIso())) {
     return { status: 'invalid-range' };
   }
 

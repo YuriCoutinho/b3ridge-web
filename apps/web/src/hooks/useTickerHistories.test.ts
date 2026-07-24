@@ -2,12 +2,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useTickerHistories } from '@/hooks/useTickerHistories';
+import { resolveRange } from '@/lib/dateRange';
 import { fetchTickerHistories, type Ticker } from '@/services/tickers';
 import { createQueryWrapper } from '@/test/queryWrapper';
 
 vi.mock('@/services/tickers');
 
-const range = { startDate: '2020-01-01', endDate: '2020-02-01' };
+const range = resolveRange('1m');
 const tickers: Ticker[] = [
   { symbol: 'PETR4', name: 'Petrobras' },
   { symbol: 'VALE3', name: 'Vale' },

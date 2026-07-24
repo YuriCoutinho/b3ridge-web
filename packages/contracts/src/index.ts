@@ -18,14 +18,26 @@ export const maxBatchSymbols = 4;
 
 export const dataLagDays = 3;
 
+export const maxLookbackYears = 2;
+
 const marketTimeZone = 'America/Sao_Paulo';
 
-export function maxEndDateIso(now: Date = new Date()): string {
+function marketTodayParts(now: Date): [number, number, number] {
   const marketToday = new Intl.DateTimeFormat('en-CA', {
     timeZone: marketTimeZone,
   }).format(now);
-  const [year, month, day] = marketToday.split('-').map(Number);
+  return marketToday.split('-').map(Number) as [number, number, number];
+}
+
+export function maxEndDateIso(now: Date = new Date()): string {
+  const [year, month, day] = marketTodayParts(now);
   const anchored = new Date(Date.UTC(year, month - 1, day - dataLagDays));
+  return anchored.toISOString().slice(0, 10);
+}
+
+export function minStartDateIso(now: Date = new Date()): string {
+  const [year, month, day] = marketTodayParts(now);
+  const anchored = new Date(Date.UTC(year - maxLookbackYears, month - 1, day));
   return anchored.toISOString().slice(0, 10);
 }
 
@@ -39,6 +51,9 @@ export const tickerHistoryQuerySchema = z
   })
   .refine((range) => range.endDate <= maxEndDateIso(), {
     message: `endDate must be at most ${dataLagDays} days ago`,
+  })
+  .refine((range) => range.startDate >= minStartDateIso(), {
+    message: `startDate must be at most ${maxLookbackYears} years ago`,
   });
 export type TickerHistoryQuery = z.infer<typeof tickerHistoryQuerySchema>;
 
@@ -58,6 +73,9 @@ export const tickerHistoryBatchQuerySchema = z
   })
   .refine((range) => range.endDate <= maxEndDateIso(), {
     message: `endDate must be at most ${dataLagDays} days ago`,
+  })
+  .refine((range) => range.startDate >= minStartDateIso(), {
+    message: `startDate must be at most ${maxLookbackYears} years ago`,
   });
 export type TickerHistoryBatchQuery = z.infer<
   typeof tickerHistoryBatchQuerySchema

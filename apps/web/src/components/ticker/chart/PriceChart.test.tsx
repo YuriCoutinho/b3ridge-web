@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PriceChart } from '@/components/ticker/chart/PriceChart';
 import { useTickerHistories } from '@/hooks/useTickerHistories';
+import { resolveRange } from '@/lib/dateRange';
 import type { Ticker, TickerHistoryPoint } from '@/services/tickers';
 
 vi.mock('@/hooks/useTickerHistories', () => ({
@@ -15,7 +16,7 @@ const selected: Ticker[] = [
   { symbol: 'PETR4', name: 'Petrobras' },
   { symbol: 'VALE3', name: 'Vale' },
 ];
-const validRange = { startDate: '2020-01-01', endDate: '2020-02-01' };
+const validRange = resolveRange('1m');
 
 function point(date: number, close: number): TickerHistoryPoint {
   return {
